@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Golden Ascent · Free Play</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sky"></div>
+  <main class="game">
+    <header class="top">
+      <h1>Golden <span>Ascent</span></h1>
+      <div class="jackpots">
+        <div class="jp grand"><b>GRAND</b><span data-jp="GRAND"></span></div>
+        <div class="jp major"><b>MAJOR</b><span data-jp="MAJOR"></span></div>
+        <div class="jp minor"><b>MINOR</b><span data-jp="MINOR"></span></div>
+        <div class="jp mini"><b>MINI</b><span data-jp="MINI"></span></div>
+      </div>
+    </header>
+
+    <section class="stage">
+      <div class="banner" id="banner"></div>
+      <div class="meter" id="meter" hidden>
+        <span>ALTITUDE</span><b id="meterValue">1x</b><i id="spinsLeft"></i>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="celebrate" id="celebrate"><div class="burst"></div><p id="celebrateText"></p></div>
+    </section>
+
+    <footer class="controls">
+      <div class="stat"><label>Credits</label><output id="balance"></output></div>
+      <div class="stat"><label>Win</label><output id="win">0.00</output></div>
+      <div class="bet">
+        <button id="betDown" aria-label="Lower bet">−</button>
+        <div class="stat"><label>Bet</label><output id="bet"></output></div>
+        <button id="betUp" aria-label="Raise bet">+</button>
+      </div>
+      <button id="spin" class="spin" aria-label="Spin">SPIN</button>
+      <button id="infoBtn" class="info" aria-label="Game info">i</button>
+    </footer>
+
+    <p class="notice">Free-play demo with play credits only. No real money. RTP 96%.</p>
+  </main>
+
+  <dialog id="info">
+    <h2>How to play</h2>
+    <p><b>1,024 ways.</b> Match 3+ symbols on adjacent reels from the left. Wilds (reels 2–4) substitute for all pay symbols.</p>
+    <p><b>Climbing Wilds.</b> At random, whole reels climb to Wild in the base game.</p>
+    <p><b>Summit Free Spins.</b> 3, 4 or 5 Summits award 8, 12 or 20 free spins. Every Wild that lands raises the Altitude multiplier by 1x, up to 10x, for the rest of the feature.</p>
+    <p><b>Treasure Hold &amp; Win.</b> 6+ Gold Coins lock in place for 3 respins. Each new coin resets the respins to 3. Fill all 20 spaces for the Grand.</p>
+    <table id="paytable"></table>
+    <p class="small">Return to player 96.2% (simulated over 50 million rounds). Max win 5,000x bet. Results are random and independent; nothing that happened before changes the next spin.</p>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

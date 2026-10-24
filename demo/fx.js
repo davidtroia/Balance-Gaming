@@ -22,7 +22,7 @@ export function startSnow(canvas) {
   function frame(t) {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     g.clearRect(0, 0, w, h);
-    g.fillStyle = 'rgba(255,255,255,.75)';
+    g.fillStyle = 'rgba(240,214,150,.6)';
     for (const f of flakes) {
       if (!reduced) {
         f.y += (f.s * storm) / h * 1.6;

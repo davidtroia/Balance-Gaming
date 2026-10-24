@@ -14,9 +14,10 @@ const defs = `
   <radialGradient id="gSapphire" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#9fd8ff"/><stop offset=".5" stop-color="#1f6fe0"/><stop offset="1" stop-color="#0a2463"/></radialGradient>
   <radialGradient id="gAmethyst" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#e7b8ff"/><stop offset=".5" stop-color="#8e38d6"/><stop offset="1" stop-color="#3a0f63"/></radialGradient>
   <radialGradient id="gMolten" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fffbe0"/><stop offset=".35" stop-color="#ffd23f"/><stop offset=".7" stop-color="#ff8a00"/><stop offset="1" stop-color="#b33a00"/></radialGradient>
-  <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2a8f"/><stop offset="1" stop-color="#ff9a4a"/></linearGradient>
+  <radialGradient id="gOnyx" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#3a352d"/><stop offset=".55" stop-color="#121010"/><stop offset="1" stop-color="#000"/></radialGradient>
+  <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050505"/><stop offset="1" stop-color="#b8924a"/></linearGradient>
   <linearGradient id="gSnow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9d4ff"/></linearGradient>
-  <linearGradient id="gRock" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7d6bb8"/><stop offset="1" stop-color="#2b1d5c"/></linearGradient>
+  <linearGradient id="gRock" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5248"/><stop offset="1" stop-color="#14110c"/></linearGradient>
   <filter id="fGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   <filter id="fShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2.5" stdDeviation="1.6" flood-color="#000" flood-opacity=".55"/></filter>
 </defs>`;
@@ -24,12 +25,13 @@ const defs = `
 // A gem-cut badge: octagon frame in gold around a jewel-tone face.
 const badge = (fill) => `
   <path d="M30 6h40l24 24v40L70 94H30L6 70V30z" fill="url(#gGoldLine)" filter="url(#fShadow)"/>
-  <path d="M33 13h34l20 20v34L67 87H33L13 67V33z" fill="url(#${fill})"/>
+  <path d="M33 13h34l20 20v34L67 87H33L13 67V33z" fill="url(#gOnyx)"/>
+  <path d="M35 17h30l18 18v30L65 83H35L17 65V35z" fill="none" stroke="url(#${fill})" stroke-width="3"/>
   <path d="M33 13h34l20 20v8C70 30 30 30 13 41v-8z" fill="#fff" opacity=".18"/>`;
 
 const letter = (ch, fill, size = 64) => `
   <text x="50" y="${size > 60 ? 72 : 69}" text-anchor="middle" font-family="'Cinzel', 'Trajan Pro', Georgia, serif" font-weight="900"
-    font-size="${size}" fill="url(#${fill})" stroke="#1b0f3a" stroke-width="3" paint-order="stroke" filter="url(#fShadow)">${ch}</text>
+    font-size="${size}" fill="url(#gGoldLine)" stroke="url(#${fill})" stroke-width="4" paint-order="stroke" filter="url(#fShadow)">${ch}</text>
   <text x="50" y="${size > 60 ? 72 : 69}" text-anchor="middle" font-family="'Cinzel', 'Trajan Pro', Georgia, serif" font-weight="900"
     font-size="${size}" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1">${ch}</text>`;
 
@@ -62,7 +64,7 @@ const ART = {
   H4: `${badge('gAmethyst')}
     <g filter="url(#fShadow)">
       <circle cx="50" cy="50" r="26" fill="url(#gGold)"/>
-      <circle cx="50" cy="50" r="20" fill="#2b1d5c"/>
+      <circle cx="50" cy="50" r="20" fill="#0c0a08"/>
       <path d="M50 30l5 20-5 20-5-20z" fill="#ff5a6e"/>
       <path d="M50 30l5 20h-10z" fill="#ffd1d6"/>
       <path d="M30 50l20-4 20 4-20 4z" fill="#ffe9a6" opacity=".9"/>
@@ -72,14 +74,14 @@ const ART = {
   K: letter('K', 'gEmerald'),
   Q: letter('Q', 'gSapphire'),
   J: letter('J', 'gAmethyst'),
-  T: letter('10', 'gGold', 50),
+  T: letter('10', 'gOnyx', 50),
   WILD: `
     <g filter="url(#fGlow)">
       ${Array.from({ length: 12 }, (_, i) => `<path d="M50 50L47 4h6z" fill="#ffd36b" opacity=".75" transform="rotate(${i * 30} 50 50)"/>`).join('')}
     </g>
     <circle cx="50" cy="50" r="30" fill="url(#gGold)" stroke="#fff3c2" stroke-width="2" filter="url(#fShadow)"/>
     <path d="M28 58l12-16 8 10 6-8 18 14z" fill="#8a4c00" opacity=".55"/>
-    <rect x="8" y="56" width="84" height="22" rx="6" fill="#d4183b" stroke="url(#gGoldLine)" stroke-width="3" filter="url(#fShadow)"/>
+    <rect x="8" y="56" width="84" height="22" rx="6" fill="#0a0908" stroke="url(#gGoldLine)" stroke-width="3" filter="url(#fShadow)"/>
     <text x="50" y="73" text-anchor="middle" font-family="'Cinzel', Georgia, serif" font-weight="900" font-size="18" fill="#fff6cf" letter-spacing="2">WILD</text>`,
   SCAT: `
     <circle cx="50" cy="48" r="40" fill="url(#gSky)" stroke="url(#gGoldLine)" stroke-width="4" filter="url(#fShadow)"/>
@@ -88,7 +90,7 @@ const ART = {
     <path d="M36 40l-6 9 4-2 3 3 3-3z" fill="url(#gSnow)"/>
     <path d="M60 26V10" stroke="#fff3c2" stroke-width="2"/>
     <path d="M60 10l14 4-14 5z" fill="url(#gGold)" filter="url(#fGlow)"/>
-    <rect x="12" y="70" width="76" height="20" rx="6" fill="#1f6fe0" stroke="url(#gGoldLine)" stroke-width="3" filter="url(#fShadow)"/>
+    <rect x="12" y="70" width="76" height="20" rx="6" fill="#0a0908" stroke="url(#gGoldLine)" stroke-width="3" filter="url(#fShadow)"/>
     <text x="50" y="85" text-anchor="middle" font-family="'Cinzel', Georgia, serif" font-weight="900" font-size="13" fill="#fff6cf" letter-spacing="1.5">SUMMIT</text>`,
   COIN: `
     <g filter="url(#fGlow)">

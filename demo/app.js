@@ -86,11 +86,11 @@ function spinReels(grid, strips, coins = []) {
       fillers.map((s) => cellHtml(s, s === 'COIN' ? { value: [0.5, 1, 2, 5][Math.floor(Math.random() * 4)] } : null)).join('') +
       shown[r].map((s) => cellHtml(s)).join('');
     const distance = (fillerCount + C.ROWS) * cell;
-    const duration = reduced ? 1 : 650 + r * 230;
+    const duration = reduced ? 1 : 520 + r * 180;
     reelEls[r].classList.add('blur');
     const anim = strip.animate([
       { transform: `translateY(${-distance}px)`, easing: 'cubic-bezier(.45,.05,.55,1)' },
-      { transform: `translateY(${cell * 0.18}px)`, offset: 0.88, easing: 'ease-out' },
+      { transform: `translateY(${cell * 0.24}px)`, offset: 0.86, easing: 'cubic-bezier(.2,1.6,.4,1)' },
       { transform: 'translateY(0)' },
     ], { duration });
     setTimeout(() => reelEls[r].classList.remove('blur'), duration * 0.75);
@@ -157,6 +157,7 @@ function party(on) { $('machine').classList.toggle('party', on); }
 function renderHud() {
   $('balance').textContent = money(balance);
   $('bet').textContent = money(bet());
+  document.body.classList.toggle('high-limit', bet() >= 100);
   for (const el of document.querySelectorAll('[data-jp]')) {
     const jp = el.dataset.jp;
     const value = jp === 'GRAND' ? C.HOLD_AND_WIN.grand.value : C.COIN_VALUES.find((c) => c.jackpot === jp).value;

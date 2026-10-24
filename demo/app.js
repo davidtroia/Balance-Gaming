@@ -5,7 +5,7 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, setMuted, isMuted, startMusic, stopMusic } from './audio.js';
+import { unlock, sfx, setMuted, isMuted, startMusic, stopMusic, startTheme, setMood, duckTheme } from './audio.js';
 import { startSnow, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
@@ -184,6 +184,7 @@ async function takeover(kicker, title, amountText, ms, amountTo = null) {
   $('takeoverTitle').textContent = title;
   $('takeoverAmount').textContent = amountText || '';
   el.hidden = false;
+  duckTheme(ms);
   let skip;
   const skipped = new Promise((r) => { skip = r; el.onclick = r; });
   const work = (async () => {
@@ -231,6 +232,7 @@ async function playFreeSpins(fs, scatterCount) {
   party(false);
   document.body.classList.add('fs');
   startMusic();
+  setMood('fs');
   snow.setStorm(2.5);
   const alt = $('altitude');
   alt.hidden = false;
@@ -262,6 +264,7 @@ async function playFreeSpins(fs, scatterCount) {
     }
   }
   stopMusic();
+  setMood('base');
   snow.setStorm(1);
   alt.hidden = true;
   document.body.classList.remove('fs');
@@ -276,6 +279,7 @@ async function playHoldAndWin(hw) {
   party(false);
   clearWins();
   document.body.classList.add('hw');
+  setMood('hw');
   const vaults = reelEls.map((reel) => {
     const v = document.createElement('div');
     v.className = 'vault';
@@ -335,6 +339,7 @@ async function playHoldAndWin(hw) {
   vaults.forEach((v) => v.remove());
   document.querySelectorAll('.jp.hit').forEach((j) => j.classList.remove('hit'));
   document.body.classList.remove('hw');
+  setMood('base');
   return total;
 }
 
@@ -443,6 +448,7 @@ document.querySelectorAll('[data-show]').forEach((b) => b.addEventListener('clic
 $('startBtn').addEventListener('click', () => {
   unlock();
   sfx.featureStart();
+  startTheme();
   $('intro').hidden = true;
   $('spin').focus();
 });

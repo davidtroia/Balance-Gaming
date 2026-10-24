@@ -146,3 +146,77 @@ export function stopMusic() {
   setTimeout(() => oscs.forEach(([o, l]) => { o.stop(); l.stop(); }), 1500);
   musicNodes = null;
 }
+
+// The theme track ("Midnight Club", made in Suno). It loops with a short
+// crossfade from the end back to the top, and each game mode sets its own
+// mood: free spins push it louder, Hold & Win muffles it for tension, and
+// big celebrations duck it so the fanfare cuts through.
+const TRACK_URL = new URL('./music/midnight-club.mp3', import.meta.url);
+const XFADE = 2;
+const MOODS = { base: { gain: 0.34, cutoff: 18000 }, fs: { gain: 0.42, cutoff: 18000 }, hw: { gain: 0.26, cutoff: 900 } };
+let theme = null;
+let mood = 'base';
+
+// Where the music really ends, skipping trailing silence.
+function lastSound(buffer) {
+  const data = buffer.getChannelData(0);
+  for (let i = data.length - 1; i > 0; i -= 64) if (Math.abs(data[i]) > 0.01) return i / buffer.sampleRate;
+  return buffer.duration;
+}
+
+export async function startTheme() {
+  if (!ctx || theme) return;
+  theme = { stopped: false };
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = MOODS[mood].cutoff;
+  const bus = ctx.createGain();
+  bus.gain.value = 0;
+  bus.connect(filter).connect(master);
+  Object.assign(theme, { filter, bus });
+  try {
+    const bytes = await (await fetch(TRACK_URL)).arrayBuffer();
+    theme.buffer = await new Promise((ok, fail) => ctx.decodeAudioData(bytes, ok, fail));
+  } catch {
+    theme = null;
+    return;
+  }
+  if (theme.stopped) return;
+  theme.end = lastSound(theme.buffer);
+  bus.gain.linearRampToValueAtTime(MOODS[mood].gain, ctx.currentTime + 2);
+  playPass(ctx.currentTime + 0.05, 0.05);
+}
+
+// One pass through the song, fading in, then fading out while the next
+// pass fades in over the top.
+function playPass(at, fadeIn) {
+  if (!theme || theme.stopped) return;
+  const src = ctx.createBufferSource();
+  const g = ctx.createGain();
+  src.buffer = theme.buffer;
+  src.connect(g).connect(theme.bus);
+  const outAt = at + theme.end - XFADE;
+  g.gain.setValueAtTime(0, at);
+  g.gain.linearRampToValueAtTime(1, at + fadeIn);
+  g.gain.setValueAtTime(1, outAt);
+  g.gain.linearRampToValueAtTime(0, outAt + XFADE);
+  src.start(at);
+  src.stop(outAt + XFADE + 0.1);
+  theme.timer = setTimeout(() => playPass(outAt, XFADE), Math.max(0, (outAt - ctx.currentTime - 5) * 1000));
+}
+
+export function setMood(next) {
+  mood = next;
+  if (!theme?.bus) return;
+  const t = ctx.currentTime;
+  theme.bus.gain.setTargetAtTime(MOODS[mood].gain, t, 0.4);
+  theme.filter.frequency.setTargetAtTime(MOODS[mood].cutoff, t, 0.4);
+}
+
+// Pull the music down under a celebration, then bring it back.
+export function duckTheme(ms) {
+  if (!theme?.bus) return;
+  const t = ctx.currentTime;
+  theme.bus.gain.setTargetAtTime(MOODS[mood].gain * 0.25, t, 0.08);
+  theme.bus.gain.setTargetAtTime(MOODS[mood].gain, t + ms / 1000, 0.6);
+}

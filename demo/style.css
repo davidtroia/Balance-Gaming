@@ -17,7 +17,10 @@
   color: var(--ink);
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; background: var(--night); }
+html, body { margin: 0; min-height: 100%; background: var(--night) !important; color: var(--ink) !important; }
+/* Hosts can inject a light theme, so every text block sets its own colour. */
+.story, .intro-note, .notice, .meter label, .showcase span, .altitude small, .intro-kicker { color: var(--ink); }
+.story { color: #f6ead0; text-shadow: 0 1px 2px #000; }
 body { overflow-x: hidden; }
 button { font-family: inherit; }
 [hidden] { display: none !important; }

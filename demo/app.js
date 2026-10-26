@@ -5,7 +5,7 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, setMuted, isMuted, startMusic, stopMusic, startTheme, setMood, duckTheme } from './audio.js';
+import { unlock, sfx, setMuted, isMuted, startTheme, setMood, duckTheme } from './audio.js';
 import { startSnow, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
@@ -231,7 +231,6 @@ async function playFreeSpins(fs, scatterCount) {
   await takeover(`${scatterCount} SUMMITS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
   party(false);
   document.body.classList.add('fs');
-  startMusic();
   setMood('fs');
   snow.setStorm(2.5);
   const alt = $('altitude');
@@ -263,12 +262,11 @@ async function playFreeSpins(fs, scatterCount) {
       await sleep(350);
     }
   }
-  stopMusic();
-  setMood('base');
   snow.setStorm(1);
   alt.hidden = true;
   document.body.classList.remove('fs');
   await takeover('FREE SPINS COMPLETE', 'SUMMIT REACHED', '0.00', 2600, total);
+  setMood('base');
   return total;
 }
 

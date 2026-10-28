@@ -86,9 +86,14 @@ function spinReels(grid, strips, coins = []) {
       fillers.map((s) => cellHtml(s, s === 'COIN' ? { value: [0.5, 1, 2, 5][Math.floor(Math.random() * 4)] } : null)).join('') +
       shown[r].map((s) => cellHtml(s)).join('');
     const distance = (fillerCount + C.ROWS) * cell;
-    const duration = reduced ? 1 : 520 + r * 180;
-    reelEls[r].classList.add('blur');
-    const anim = strip.animate([
+    // The spin is the game, so the reels always roll. With Reduce Motion on
+    // they skip the blur and the overshoot bounce instead of snapping.
+    const duration = 520 + r * 180;
+    if (!reduced) reelEls[r].classList.add('blur');
+    const anim = strip.animate(reduced ? [
+      { transform: `translateY(${-distance}px)`, easing: 'cubic-bezier(.3,.1,.3,1)' },
+      { transform: 'translateY(0)' },
+    ] : [
       { transform: `translateY(${-distance}px)`, easing: 'cubic-bezier(.45,.05,.55,1)' },
       { transform: `translateY(${cell * 0.24}px)`, offset: 0.86, easing: 'cubic-bezier(.2,1.6,.4,1)' },
       { transform: 'translateY(0)' },

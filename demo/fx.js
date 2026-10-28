@@ -90,7 +90,6 @@ export function createOverlay(canvas) {
   return {
     // Coins fountain up from the bottom and rain down. Count scales with the win.
     coinShower(count, ms = 2500) {
-      if (reduced) return;
       const w = canvas.clientWidth, h = canvas.clientHeight;
       let made = 0;
       const timer = setInterval(() => {
@@ -106,7 +105,6 @@ export function createOverlay(canvas) {
       }, ms / Math.max(1, count / 4));
     },
     sparkle(x, y, n = 18, colors = ['#fff6cf', '#ffd36b', '#ff9a3c']) {
-      if (reduced) return;
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2, s = 1 + Math.random() * 4;
         parts.push({ kind: 'spark', x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, grav: 0.05,

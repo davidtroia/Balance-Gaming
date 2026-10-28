@@ -327,6 +327,8 @@ dialog button { background: var(--gold); border: 0; border-radius: 8px; padding:
   .spin { grid-column: 2; grid-row: 2 / span 2; }
   .side { grid-column: 1; }
 }
+/* Reduce Motion stills the drifting scenery and the spinning burst rays.
+   Reels, lights and win celebrations stay, since they are the game. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .world *, .takeover .rays { animation: none !important; transition: none !important; }
 }

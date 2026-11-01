@@ -6,7 +6,7 @@ import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
 import { unlock, sfx, setMuted, isMuted, startTheme, setMood, duckTheme } from './audio.js';
-import { startSnow, createOverlay } from './fx.js';
+import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
 const TIERS = [[100, 'LEGENDARY'], [50, 'EPIC WIN'], [25, 'MEGA WIN'], [10, 'BIG WIN']];
@@ -29,7 +29,7 @@ let busy = false;
 const bet = () => BETS[betIdx];
 
 document.body.insertAdjacentHTML('afterbegin', SVG_DEFS);
-const snow = startSnow($('snow'));
+const confetti = startConfetti($('confetti'));
 const fx = createOverlay($('fx'));
 
 // ---------- reels ----------
@@ -212,47 +212,46 @@ async function celebrate(amount) {
   party(true);
   sfx.bigWin();
   fx.coinShower(Math.min(160, 30 + Math.round(x * 1.5)), 2400);
-  snow.setStorm(4);
+  confetti.setStorm(4);
   await takeover('YOU WIN', tier[1], '0.00', Math.min(5200, 2200 + x * 30), amount);
-  snow.setStorm(1);
+  confetti.setStorm(1);
   party(false);
 }
 
 // ---------- features ----------
 
-const ALT_TOP = 8849; // metres at the 10x cap, the height of Everest
-function setAltitude(mult) {
+// Free spins parade meter: every Wild raises the multiplier, up to 10x.
+function setParadeMeter(mult) {
   const pct = ((mult - 1) / (C.FS_MULT_CAP - 1)) * 100;
-  $('altFill').style.height = `${pct}%`;
-  $('climber').style.bottom = `${pct}%`;
-  $('altitude').style.setProperty('--alt', `${pct}%`);
-  $('altMult').textContent = `${mult}x`;
-  $('altMeters').textContent = `${Math.round(1000 + ((mult - 1) * (ALT_TOP - 1000)) / (C.FS_MULT_CAP - 1)).toLocaleString('en-US')} m`;
+  $('paradeFill').style.height = `${pct}%`;
+  $('marker').style.bottom = `${pct}%`;
+  $('parade').style.setProperty('--alt', `${pct}%`);
+  $('paradeMult').textContent = `${mult}x`;
 }
 
 async function playFreeSpins(fs, scatterCount) {
   sfx.featureStart();
   party(true);
-  await takeover(`${scatterCount} SUMMITS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
+  await takeover(`${scatterCount} SCATTERS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
   party(false);
   document.body.classList.add('fs');
   setMood('fs');
-  snow.setStorm(2.5);
-  const alt = $('altitude');
+  confetti.setStorm(2.5);
+  const alt = $('parade');
   alt.hidden = false;
-  setAltitude(1);
+  setParadeMeter(1);
   let total = 0, mult = 1;
   for (const [i, spin] of fs.spins.entries()) {
     led(`Free spin ${i + 1} · ${spin.remaining} left`);
     await spinReels(spin.grid, reels.free);
     if (spin.multiplier > mult) {
       mult = spin.multiplier;
-      setAltitude(mult);
+      setParadeMeter(mult);
       sfx.multiplierUp();
       alt.classList.remove('bump'); void alt.offsetWidth; alt.classList.add('bump');
-      const b = $('climber').getBoundingClientRect();
-      fx.sparkle(b.left + b.width / 2, b.top + b.height / 2, 24, ['#38e0a0', '#9b6bff', '#ffcf5a']);
-      led(`Altitude up · ${mult}x`, true);
+      const b = $('marker').getBoundingClientRect();
+      fx.sparkle(b.left + b.width / 2, b.top + b.height / 2, 24, ['#4ee07a', '#b46bff', '#ffd36b']);
+      led(`Parade multiplier · ${mult}x`, true);
     }
     const cells = markWins(spin.grid, spin.wins, spin.retrigger > 0);
     if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); sfx.featureStart(); }
@@ -267,10 +266,10 @@ async function playFreeSpins(fs, scatterCount) {
       await sleep(350);
     }
   }
-  snow.setStorm(1);
+  confetti.setStorm(1);
   alt.hidden = true;
   document.body.classList.remove('fs');
-  await takeover('FREE SPINS COMPLETE', 'SUMMIT REACHED', '0.00', 2600, total);
+  await takeover('FREE SPINS COMPLETE', 'WHAT A PARADE', '0.00', 2600, total);
   setMood('base');
   return total;
 }
@@ -278,7 +277,7 @@ async function playFreeSpins(fs, scatterCount) {
 async function playHoldAndWin(hw) {
   sfx.featureStart();
   party(true);
-  await takeover(`${hw.start.length} GOLD COINS`, 'HOLD & WIN', '3 RESPINS', 2400);
+  await takeover(`${hw.start.length} DOUBLOONS`, 'HOLD & WIN', '3 RESPINS', 2400);
   party(false);
   clearWins();
   document.body.classList.add('hw');
@@ -327,17 +326,17 @@ async function playHoldAndWin(hw) {
     }
     left = step.respinsLeft;
     showLamps(left);
-    if (step.landed.length) led('New coin! Respins reset to 3', true);
+    if (step.landed.length) led('New doubloon! Respins reset to 3', true);
     await sleep(500);
   }
   if (hw.full) {
     sfx.jackpot();
     document.querySelector('.jp.grand').classList.add('hit');
-    led('Vault filled · GRAND JACKPOT!', true);
+    led('Board filled · GRAND JACKPOT!', true);
     await sleep(1500);
   }
   const total = hw.total * bet();
-  await takeover('TREASURE VAULT', 'HOLD & WIN', '0.00', 2600, total);
+  await takeover('DOUBLOON HOLD & WIN', 'TOTAL WIN', '0.00', 2600, total);
   $('respins').hidden = true;
   vaults.forEach((v) => v.remove());
   document.querySelectorAll('.jp.hit').forEach((j) => j.classList.remove('hit'));
@@ -347,7 +346,7 @@ async function playHoldAndWin(hw) {
 }
 
 async function playClimbingWilds(round) {
-  led('Climbing Wilds!', true);
+  led('Krewe Wilds!', true);
   sfx.wildClimb();
   for (const r of round.climbing) {
     const col = document.createElement('div');
@@ -418,7 +417,7 @@ async function spin(roundRng = rng) {
   await celebrate(total);
   if (round.capped) led('Max win reached!', true);
   else if (total > 0) led(`Total win ${money(total)}`);
-  else led('Spin again to keep climbing');
+  else led('Spin again · the parade rolls on');
 
   balance += total;
   renderHud();

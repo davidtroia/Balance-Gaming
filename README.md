@@ -2,9 +2,9 @@
 
 Casino game studio: games built for licensed, regulated online casinos.
 
-## Golden Ascent (first title)
+## Mardi Gras Mayhem (first title)
 
-A 5x4, 1,024-ways video slot with a mountain-climb treasure theme.
+A 5x4, 1,024-ways video slot with a New Orleans Mardi Gras theme.
 
 | | |
 |---|---|
@@ -12,7 +12,7 @@ A 5x4, 1,024-ways video slot with a mountain-climb treasure theme.
 | Hit frequency | ~27% (about 1 in 3.7 rounds pays) |
 | Volatility | Medium-high |
 | Max win | 5,000x bet |
-| Features | Climbing Wilds, Summit Free Spins with an altitude multiplier, Treasure Hold & Win with four fixed jackpots |
+| Features | Krewe Wilds, Free Spins Parade with a parade multiplier, Doubloon Hold & Win with four fixed jackpots |
 
 ### Run it
 

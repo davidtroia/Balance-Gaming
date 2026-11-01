@@ -1,4 +1,4 @@
-// Golden Ascent game engine. Pure functions: give it an RNG, get back a full
+// Mardi Gras Mayhem game engine. Pure functions: give it an RNG, get back a full
 // round record. The demo animates that record; the simulator totals it.
 // Outcomes are decided entirely by the RNG before anything is shown.
 

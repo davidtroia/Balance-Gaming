@@ -3,53 +3,130 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Golden Ascent</title>
+  <title>Mardi Gras Mayhem</title>
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Nunito:wght@600;800;900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@700;900&family=Nunito:wght@600;800;900&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="gFrame" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff4c4"/><stop offset=".45" stop-color="#f0c24a"/><stop offset=".75" stop-color="#b47a10"/><stop offset="1" stop-color="#ffe9a0"/>
+      </linearGradient>
+      <radialGradient id="gLamp"><stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/><stop offset=".35" stop-color="#ff9a3c" stop-opacity=".35"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/></radialGradient>
+      <radialGradient id="gWindow" cx="50%" cy="60%" r="70%"><stop offset="0" stop-color="#ffd890"/><stop offset=".6" stop-color="#e8862e"/><stop offset="1" stop-color="#7a2e10"/></radialGradient>
+      <linearGradient id="gBrickL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1a0814"/><stop offset="1" stop-color="#4a1e2a"/></linearGradient>
+      <linearGradient id="gBrickR" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#1a0814"/><stop offset="1" stop-color="#4a1e2a"/></linearGradient>
+      <pattern id="pRail" width="14" height="40" patternUnits="userSpaceOnUse"><rect width="2.5" height="40" x="5" fill="#0b0408"/><circle cx="6.2" cy="20" r="3.2" fill="none" stroke="#0b0408" stroke-width="1.6"/></pattern>
+      <pattern id="pCobble" width="46" height="18" patternUnits="userSpaceOnUse"><ellipse cx="11" cy="9" rx="10" ry="6.5" fill="#3a2030"/><ellipse cx="34" cy="9" rx="10" ry="6.5" fill="#33192a"/></pattern>
+      <symbol id="fdl" viewBox="0 0 100 100">
+        <path d="M50 4C38 18 36 34 45 50h10c9-16 7-32-5-46z"/>
+        <path d="M45 52C34 54 18 50 14 38c-3-10 6-18 14-14 6 3 6 11 0 13 4 2 10 0 13-6 2 8 2 15 4 21z"/>
+        <path d="M55 52c11 2 27-2 31-14 3-10-6-18-14-14-6 3-6 11 0 13-4 2-10 0-13-6-2 8-2 15-4 21z"/>
+        <path d="M30 52h40v9H30z"/>
+        <path d="M42 61c-4 10-10 16-18 18 6 4 16 2 22-6l4 10 4-10c6 8 16 10 22 6-8-2-14-8-18-18z"/>
+      </symbol>
+    </defs>
+  </svg>
+
   <div class="world" id="world" aria-hidden="true">
-    <div class="sky"></div>
-    <div class="aurora"></div>
-    <div class="sun"></div>
-    <svg class="range far" viewBox="0 0 1200 300" preserveAspectRatio="none"><path d="M0 300V190l90-60 70 40 120-110 90 80 80-50 130 120 110-90 120 70 90-60 120 90 90-40v210z"/></svg>
-    <svg class="range mid" viewBox="0 0 1200 300" preserveAspectRatio="none"><path d="M0 300V220l140-90 80 50 160-150 60 50 50-30 170 150 120-60 150 90 130-110 140 120v150z"/><path class="snow" d="M380 30l-38 36 18-6 16 14 14-16 22 8zM820 120l-26 22 14-4 12 10 10-10 16 4z"/></svg>
-    <svg class="range near" viewBox="0 0 1200 300" preserveAspectRatio="none"><path d="M0 300V250l160-60 140 50 180-90 160 80 140-40 200 70 220-60v200z"/></svg>
-    <canvas id="snow" class="snowfall"></canvas>
+    <!-- A French Quarter street on Fat Tuesday night: iron balconies, gas lamps, beads strung overhead. -->
+    <svg class="street" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+      <rect width="1600" height="900" fill="url(#gSkyNight)"/>
+      <defs>
+        <linearGradient id="gSkyNight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d0420"/><stop offset=".55" stop-color="#2a0b45"/><stop offset=".8" stop-color="#5a1d52"/><stop offset="1" stop-color="#2a0e22"/></linearGradient>
+        <linearGradient id="gStreet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1020" stop-opacity=".2"/><stop offset="1" stop-color="#120610"/></linearGradient>
+      </defs>
+      <g class="stars" fill="#fff3d0">
+        <circle cx="620" cy="60" r="1.6"/><circle cx="700" cy="120" r="1.1"/><circle cx="820" cy="40" r="1.4"/><circle cx="940" cy="100" r="1.2"/><circle cx="1010" cy="50" r="1.6"/><circle cx="760" cy="200" r="1"/><circle cx="880" cy="170" r="1.3"/><circle cx="560" cy="150" r="1"/><circle cx="1060" cy="160" r="1.1"/>
+      </g>
+      <!-- distant rooftops down the street -->
+      <path d="M520 760V470h70v-30h60v40h50v-60h80v50h40v-40h90v60h60v-30h70v320z" fill="#1c0a26"/>
+      <g fill="#ffb45a" opacity=".55">
+        <rect x="540" y="500" width="14" height="22"/><rect x="600" y="520" width="14" height="22"/><rect x="740" y="470" width="14" height="22"/><rect x="800" y="520" width="14" height="22"/><rect x="920" y="500" width="14" height="22"/><rect x="980" y="540" width="14" height="22"/><rect x="1040" y="480" width="14" height="22"/>
+      </g>
+      <!-- left townhouse -->
+      <path d="M0 0h470v900H0z" fill="url(#gBrickL)"/>
+      <g fill="url(#gWindow)">
+        <path d="M80 190h90v120H80zM80 190a45 45 0 0 1 90 0z"/><path d="M280 190h90v120h-90zM280 190a45 45 0 0 1 90 0z"/>
+        <path d="M80 470h90v150H80zM80 470a45 45 0 0 1 90 0z"/><path d="M280 470h90v150h-90zM280 470a45 45 0 0 1 90 0z"/>
+      </g>
+      <g stroke="#2a0e18" stroke-width="5" fill="none"><path d="M125 150v160M80 250h90M325 150v160M280 250h90M125 430v190M80 540h90M325 430v190M280 540h90"/></g>
+      <rect x="0" y="320" width="500" height="10" fill="#0b0408"/><rect x="0" y="330" width="500" height="44" fill="url(#pRail)"/><rect x="0" y="372" width="500" height="6" fill="#0b0408"/>
+      <rect x="0" y="630" width="500" height="10" fill="#0b0408"/><rect x="0" y="640" width="500" height="44" fill="url(#pRail)"/><rect x="0" y="682" width="500" height="6" fill="#0b0408"/>
+      <path d="M470 0v900" stroke="#0b0408" stroke-width="8"/>
+      <!-- right townhouse -->
+      <path d="M1130 0h470v900h-470z" fill="url(#gBrickR)"/>
+      <g fill="url(#gWindow)">
+        <path d="M1230 190h90v120h-90zM1230 190a45 45 0 0 1 90 0z"/><path d="M1430 190h90v120h-90zM1430 190a45 45 0 0 1 90 0z"/>
+        <path d="M1230 470h90v150h-90zM1230 470a45 45 0 0 1 90 0z"/><path d="M1430 470h90v150h-90zM1430 470a45 45 0 0 1 90 0z"/>
+      </g>
+      <g stroke="#2a0e18" stroke-width="5" fill="none"><path d="M1275 150v160M1230 250h90M1475 150v160M1430 250h90M1275 430v190M1230 540h90M1475 430v190M1430 540h90"/></g>
+      <rect x="1100" y="320" width="500" height="10" fill="#0b0408"/><rect x="1100" y="330" width="500" height="44" fill="url(#pRail)"/><rect x="1100" y="372" width="500" height="6" fill="#0b0408"/>
+      <rect x="1100" y="630" width="500" height="10" fill="#0b0408"/><rect x="1100" y="640" width="500" height="44" fill="url(#pRail)"/><rect x="1100" y="682" width="500" height="6" fill="#0b0408"/>
+      <path d="M1130 0v900" stroke="#0b0408" stroke-width="8"/>
+      <!-- beads strung across the street -->
+      <g fill="none" stroke-linecap="round" stroke-width="11">
+        <path d="M470 120Q800 300 1130 120" stroke="#8a2be2" stroke-dasharray="0 33"/>
+        <path d="M470 120Q800 300 1130 120" stroke="#f0c24a" stroke-dasharray="0 33" stroke-dashoffset="-11"/>
+        <path d="M470 120Q800 300 1130 120" stroke="#1fae4a" stroke-dasharray="0 33" stroke-dashoffset="-22"/>
+        <path d="M470 40Q800 200 1130 40" stroke="#1fae4a" stroke-dasharray="0 30" stroke-width="9"/>
+        <path d="M470 40Q800 200 1130 40" stroke="#8a2be2" stroke-dasharray="0 30" stroke-dashoffset="-10" stroke-width="9"/>
+        <path d="M470 40Q800 200 1130 40" stroke="#f0c24a" stroke-dasharray="0 30" stroke-dashoffset="-20" stroke-width="9"/>
+      </g>
+      <!-- gas lamps -->
+      <g class="lamps">
+        <circle cx="500" cy="420" r="120" fill="url(#gLamp)"/><circle cx="1100" cy="420" r="120" fill="url(#gLamp)"/>
+        <path d="M470 380h30v10h-30z" fill="#0b0408"/><path d="M486 392h28l-4 46h-20z" fill="#ffc46a" stroke="#0b0408" stroke-width="4"/>
+        <path d="M1130 380h-30v10h30z" fill="#0b0408"/><path d="M1086 392h28l-4 46h-20z" fill="#ffc46a" stroke="#0b0408" stroke-width="4"/>
+      </g>
+      <!-- cobblestones -->
+      <path d="M0 900V760h1600v140z" fill="url(#pCobble)"/>
+      <path d="M0 900V760h1600v140z" fill="url(#gStreet)"/>
+      <ellipse cx="800" cy="800" rx="420" ry="50" fill="#f0c24a" opacity=".08"/>
+    </svg>
+    <canvas id="confetti" class="confetti"></canvas>
   </div>
 
   <main class="cabinet" id="cabinet">
     <header class="marquee">
-      <div class="logo">
-        <span class="logo-top">GOLDEN</span>
-        <span class="logo-main">ASCENT</span>
-      </div>
-      <div class="jackpots">
+      <svg class="crest" aria-hidden="true"><use href="#fdl"/></svg>
+      <h1 class="logo"><span>Mardi Gras</span><span>Mayhem</span></h1>
+    </header>
+
+    <div class="stage">
+      <aside class="ladder" aria-label="Jackpots">
+        <svg class="ladder-crest" aria-hidden="true"><use href="#fdl"/></svg>
         <div class="jp grand"><b>GRAND</b><span data-jp="GRAND"></span></div>
         <div class="jp major"><b>MAJOR</b><span data-jp="MAJOR"></span></div>
         <div class="jp minor"><b>MINOR</b><span data-jp="MINOR"></span></div>
         <div class="jp mini"><b>MINI</b><span data-jp="MINI"></span></div>
-      </div>
-    </header>
+        <p class="ladder-note">6+ doubloons start Hold &amp; Win</p>
+      </aside>
 
-    <section class="machine" id="machine">
-      <div class="bulbs" id="bulbs"></div>
-      <div class="led" id="led"><span id="ledText">Press SPIN to begin your climb</span></div>
-      <div class="window">
-        <div class="altitude" id="altitude" hidden>
-          <div class="alt-track"><div class="alt-fill" id="altFill"></div><div class="climber" id="climber">▲</div></div>
-          <b id="altMult">1x</b>
-          <small id="altMeters">1,000 m</small>
+      <section class="machine" id="machine">
+        <svg class="corner tl" aria-hidden="true"><use href="#fdl"/></svg>
+        <svg class="corner tr" aria-hidden="true"><use href="#fdl"/></svg>
+        <svg class="corner bl" aria-hidden="true"><use href="#fdl"/></svg>
+        <svg class="corner br" aria-hidden="true"><use href="#fdl"/></svg>
+        <div class="bulbs" id="bulbs"></div>
+        <div class="led" id="led"><span id="ledText">Press SPIN to start the parade</span></div>
+        <div class="parade" id="parade" hidden>
+          <span class="parade-label">Parade multiplier</span>
+          <div class="parade-track"><div class="parade-fill" id="paradeFill"></div><div class="marker" id="marker">⚜</div></div>
+          <b id="paradeMult">1x</b>
         </div>
-        <div class="reels" id="reels"></div>
-        <div class="respins" id="respins" hidden>
-          <span>RESPINS</span><i></i><i></i><i></i>
+        <div class="window">
+          <div class="reels" id="reels"></div>
+          <div class="respins" id="respins" hidden>
+            <span>RESPINS</span><i></i><i></i><i></i>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <footer class="controls">
       <div class="meter"><label>CREDITS</label><output id="balance"></output></div>
@@ -70,7 +147,7 @@
       <span>Sales demo</span>
       <button data-show="fs">Play Free Spins</button>
       <button data-show="hw">Play Hold &amp; Win</button>
-      <button data-show="cw">Play Climbing Wilds</button>
+      <button data-show="cw">Play Krewe Wilds</button>
     </div>
     <p class="notice">Free-play demo with play credits only. No real money. RTP 96.25%. Bonus odds are fixed; the sales demo buttons replay recorded rounds and do not exist in the real-money game.</p>
   </main>
@@ -88,10 +165,11 @@
 
   <div class="intro" id="intro">
     <div class="intro-card">
+      <svg class="crest" aria-hidden="true"><use href="#fdl"/></svg>
       <p class="intro-kicker">A Balance Gaming original</p>
-      <h1><span>GOLDEN</span>ASCENT</h1>
-      <p class="story">Legend says a golden eagle guards the treasure of the highest peak. Climb with it through the storm. Every Summit you find lifts you higher, every Wild raises your altitude, and Gold Coins open the treasure vault.</p>
-      <button id="startBtn" class="start">Start the climb</button>
+      <h1 class="logo"><span>Mardi Gras</span><span>Mayhem</span></h1>
+      <p class="story">It's Fat Tuesday in the French Quarter, and King Gator rules the parade. Catch gold doubloons to fill the Hold &amp; Win board, land three Free Spins symbols to join the parade, and every Wild that marches in raises your multiplier.</p>
+      <button id="startBtn" class="start">Let the good times roll</button>
       <p class="intro-note">Sound on. Play credits only.</p>
     </div>
   </div>
@@ -99,9 +177,9 @@
   <dialog id="info">
     <h2>How to play</h2>
     <p><b>1,024 ways.</b> Match 3 or more symbols on adjacent reels from the left. Wilds land on reels 2 to 4 and stand in for every pay symbol.</p>
-    <p><b>Climbing Wilds.</b> At random, whole reels climb to Wild in the base game.</p>
-    <p><b>Summit Free Spins.</b> 3, 4 or 5 Summits award 8, 12 or 20 free spins. Every Wild that lands raises your altitude multiplier by 1x, up to 10x, for the rest of the feature. 3 Summits during the feature add 5 more spins.</p>
-    <p><b>Treasure Hold &amp; Win.</b> 6 or more Gold Coins lock in place for 3 respins. Each new coin resets the respins to 3. Mini, Minor and Major coins pay their jackpot. Fill all 20 spaces for the Grand.</p>
+    <p><b>Krewe Wilds.</b> At random, whole reels turn Wild in the base game.</p>
+    <p><b>Free Spins parade.</b> 3, 4 or 5 Free Spins symbols award 8, 12 or 20 free spins. Every Wild that lands raises the parade multiplier by 1x, up to 10x, for the rest of the feature. 3 Free Spins symbols during the feature add 5 more spins.</p>
+    <p><b>Doubloon Hold &amp; Win.</b> 6 or more gold doubloons lock in place for 3 respins. Each new doubloon resets the respins to 3. Mini, Minor and Major doubloons pay their jackpot. Fill all 20 spaces for the Grand.</p>
     <div class="table-wrap"><table id="paytable"></table></div>
     <p class="small">Return to player 96.25%, measured over 50 million simulated rounds. Max win 5,000x bet. Every spin is random and independent; past results never change the next spin.</p>
     <form method="dialog"><button>Close</button></form>

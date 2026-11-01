@@ -1,4 +1,4 @@
-// Golden Ascent math model. Every number that affects RTP lives in this file,
+// Mardi Gras Mayhem math model. Every number that affects RTP lives in this file,
 // so the par sheet, the simulator and the demo all read the same source.
 //
 // All pays are multiples of the TOTAL bet. Tuned to ~96% RTP; run
@@ -10,14 +10,14 @@ export const MAX_WIN = 5000;
 
 export const SYMBOLS = {
   WILD: { name: 'Wild', kind: 'wild' },
-  SCAT: { name: 'Summit', kind: 'scatter' },
-  COIN: { name: 'Gold Coin', kind: 'coin' },
-  H1: { name: 'Eagle', kind: 'pay' },
-  H2: { name: 'Ibex', kind: 'pay' },
-  H3: { name: 'Lantern', kind: 'pay' },
-  H4: { name: 'Compass', kind: 'pay' },
-  A: { name: 'A', kind: 'pay' },
-  K: { name: 'K', kind: 'pay' },
+  SCAT: { name: 'Free Spins', kind: 'scatter' },
+  COIN: { name: 'Doubloon', kind: 'coin' },
+  H1: { name: 'King Gator', kind: 'pay' },
+  H2: { name: 'Lucky 777', kind: 'pay' },
+  H3: { name: 'Fleur-de-lis', kind: 'pay' },
+  H4: { name: 'Carnival Mask', kind: 'pay' },
+  A: { name: 'Beads', kind: 'pay' },
+  K: { name: 'Okra', kind: 'pay' },
   Q: { name: 'Q', kind: 'pay' },
   J: { name: 'J', kind: 'pay' },
   T: { name: '10', kind: 'pay' },
@@ -40,7 +40,7 @@ export const PAYTABLE = {
 export const SCATTER_PAY = { 3: 1, 4: 5, 5: 25 };
 export const FREE_SPINS_AWARD = { 3: 8, 4: 12, 5: 20 };
 export const FREE_SPINS_RETRIGGER = 5;   // 3+ scatters during free spins
-export const FS_MULT_CAP = 10;           // altitude meter maximum
+export const FS_MULT_CAP = 10;           // parade multiplier maximum
 
 // Stack height of each symbol on the strips (1 when not listed). Stacked
 // premiums make bigger ways wins; single low symbols keep small wins coming.

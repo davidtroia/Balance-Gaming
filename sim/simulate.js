@@ -1,4 +1,4 @@
-// Monte Carlo simulator for the Golden Ascent math model.
+// Monte Carlo simulator for the Mardi Gras Mayhem math model.
 // Usage: node sim/simulate.js [spins=10000000] [seed=1] [--json=report.json]
 
 import fs from 'node:fs';
@@ -57,7 +57,7 @@ const report = {
 if (jsonOut) fs.writeFileSync(jsonOut, JSON.stringify(report, null, 2));
 {
   const pct = (x) => (x * 100).toFixed(3) + '%';
-  console.log(`Golden Ascent — ${spins.toLocaleString()} spins, seed ${seed}`);
+  console.log(`Mardi Gras Mayhem — ${spins.toLocaleString()} spins, seed ${seed}`);
   console.log(`RTP              ${pct(rtp)}  (±${pct(report.rtp95)} at 95%)`);
   for (const [k, v] of Object.entries(report.breakdown)) console.log(`  ${k.padEnd(14)} ${pct(v)}`);
   console.log(`Hit frequency    ${pct(report.hitFrequency)}  (1 in ${(1 / report.hitFrequency).toFixed(2)})`);

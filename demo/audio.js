@@ -1,6 +1,6 @@
-// Synthesized sound effects with the Web Audio API, so there are no audio
-// files to ship. Browsers only allow sound after the player taps something,
-// so unlock() is called from the Start button.
+// Sound: synthesized effects with the Web Audio API, the theme music, the
+// game-show host's voice lines and crowd applause. Browsers only allow sound
+// after the player taps something, so unlock() is called from the Start button.
 
 let ctx = null;
 let master = null;
@@ -212,4 +212,142 @@ export function duckTheme(ms) {
   const t = ctx.currentTime;
   music.bus.gain.setTargetAtTime(MOODS[mood].gain * 0.25, t, 0.08);
   music.bus.gain.setTargetAtTime(MOODS[mood].gain, t + ms / 1000, 0.6);
+}
+
+// ---------- host voice and crowd ----------
+
+// Lines read by the game-show host. They were generated with the Kokoro
+// text-to-speech model (Apache-2.0) and mastered with a little room reverb.
+// cheer.mp3 is a small crowd shouting, built the same way from many voices.
+const VOICE = {
+  welcome: new URL('./voice/welcome.mp3', import.meta.url).href,
+  freespins: new URL('./voice/freespins.mp3', import.meta.url).href,
+  retrigger: new URL('./voice/retrigger.mp3', import.meta.url).href,
+  paradeover: new URL('./voice/paradeover.mp3', import.meta.url).href,
+  holdwin: new URL('./voice/holdwin.mp3', import.meta.url).href,
+  totalwin: new URL('./voice/totalwin.mp3', import.meta.url).href,
+  bigwin: new URL('./voice/bigwin.mp3', import.meta.url).href,
+  megawin: new URL('./voice/megawin.mp3', import.meta.url).href,
+  epicwin: new URL('./voice/epicwin.mp3', import.meta.url).href,
+  legendary: new URL('./voice/legendary.mp3', import.meta.url).href,
+  krewe: new URL('./voice/krewe.mp3', import.meta.url).href,
+  mini: new URL('./voice/mini.mp3', import.meta.url).href,
+  minor: new URL('./voice/minor.mp3', import.meta.url).href,
+  major: new URL('./voice/major.mp3', import.meta.url).href,
+  grand: new URL('./voice/grand.mp3', import.meta.url).href,
+  maxwin: new URL('./voice/maxwin.mp3', import.meta.url).href,
+  cheer: new URL('./voice/cheer.mp3', import.meta.url).href,
+};
+const clips = {};
+let speaking = null;
+
+function loadClip(name) {
+  clips[name] ??= fetch(VOICE[name])
+    .then((r) => r.arrayBuffer())
+    .then((bytes) => new Promise((ok, fail) => ctx.decodeAudioData(bytes, ok, fail)))
+    .catch(() => null);
+  return clips[name];
+}
+
+// Decode every line up front so the host never lags behind the screen.
+export function preloadVoices() {
+  if (!ctx) return;
+  Object.keys(VOICE).forEach(loadClip);
+  buildApplause();
+}
+
+// The host announces one line; a new line cuts off the one before it.
+export async function say(name) {
+  if (!ctx) return;
+  const buffer = await loadClip(name);
+  if (!buffer) return;
+  try { speaking?.stop(); } catch { /* already finished */ }
+  const src = ctx.createBufferSource();
+  const g = ctx.createGain();
+  g.gain.value = 1.1;
+  src.buffer = buffer;
+  src.connect(g).connect(master);
+  src.start();
+  speaking = src;
+  duckTheme(buffer.duration * 1000 + 400);
+}
+
+// Applause is rendered offline once, from hundreds of tiny noise-burst claps
+// over a soft crowd roar, at three sizes: polite, warm and a standing ovation.
+const CLAPS = [{ secs: 1.6, rate: 30, roar: 0 }, { secs: 3, rate: 70, roar: 0.25 }, { secs: 5, rate: 130, roar: 0.5 }];
+let applauseBuffers = null;
+
+function buildApplause() {
+  if (applauseBuffers || !window.OfflineAudioContext) return;
+  applauseBuffers = Promise.all(CLAPS.map(({ secs, rate, roar }) => {
+    const sr = 44100;
+    const off = new OfflineAudioContext(2, Math.ceil(sr * secs), sr);
+    const clap = off.createBuffer(1, Math.ceil(sr * 0.04), sr);
+    const d = clap.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.006));
+    // Crowd intensity: swells in fast, holds, then tails away.
+    const env = (t) => Math.min(1, t / 0.25) * Math.min(1, Math.max(0, (secs - t) / (secs * 0.45)));
+    for (let n = Math.round(rate * secs); n > 0; n--) {
+      const t = Math.random() * secs;
+      if (Math.random() > env(t)) continue;
+      const src = off.createBufferSource();
+      src.buffer = clap;
+      src.playbackRate.value = 0.7 + Math.random() * 0.7;
+      const bp = off.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 900 + Math.random() * 1800;
+      bp.Q.value = 1.1;
+      const g = off.createGain();
+      g.gain.value = 0.25 + Math.random() * 0.75;
+      const pan = off.createStereoPanner();
+      pan.pan.value = Math.random() * 1.6 - 0.8;
+      src.connect(bp).connect(g).connect(pan).connect(off.destination);
+      src.start(t);
+    }
+    if (roar) {
+      const noise = off.createBuffer(1, Math.ceil(sr * secs), sr);
+      const nd = noise.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < nd.length; i++) { last = last * 0.97 + (Math.random() * 2 - 1) * 0.03; nd[i] = last * 6; }
+      const src = off.createBufferSource();
+      src.buffer = noise;
+      const lp = off.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 1100;
+      const g = off.createGain();
+      g.gain.setValueAtTime(0, 0);
+      g.gain.linearRampToValueAtTime(roar, 0.4);
+      g.gain.setValueAtTime(roar, secs * 0.55);
+      g.gain.linearRampToValueAtTime(0, secs);
+      src.connect(lp).connect(g).connect(off.destination);
+      src.start(0);
+    }
+    return off.startRendering();
+  })).catch(() => null);
+}
+
+// Crowd reaction to a win. size 0 is polite applause, 1 a standing ovation
+// with cheering; anything from 0.5 up brings in the cheer.
+export async function applause(size = 0.3) {
+  if (!ctx) return;
+  buildApplause();
+  const buffers = await applauseBuffers;
+  if (buffers) {
+    const src = ctx.createBufferSource();
+    const g = ctx.createGain();
+    src.buffer = buffers[size >= 0.75 ? 2 : size >= 0.35 ? 1 : 0];
+    g.gain.value = 0.35 + size * 0.35;
+    src.connect(g).connect(master);
+    src.start();
+  }
+  if (size >= 0.5) {
+    const cheer = await loadClip('cheer');
+    if (!cheer) return;
+    const src = ctx.createBufferSource();
+    const g = ctx.createGain();
+    src.buffer = cheer;
+    g.gain.value = 0.35 + size * 0.4;
+    src.connect(g).connect(master);
+    src.start(ctx.currentTime + 0.15);
+  }
 }

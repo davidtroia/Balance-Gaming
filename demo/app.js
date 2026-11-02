@@ -5,11 +5,11 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, setMuted, isMuted, startTheme, setMood, duckTheme } from './audio.js';
+import { unlock, sfx, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices } from './audio.js';
 import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
-const TIERS = [[100, 'LEGENDARY'], [50, 'EPIC WIN'], [25, 'MEGA WIN'], [10, 'BIG WIN']];
+const TIERS = [[100, 'LEGENDARY', 'legendary', 1], [50, 'EPIC WIN', 'epicwin', 0.9], [25, 'MEGA WIN', 'megawin', 0.75], [10, 'BIG WIN', 'bigwin', 0.6]];
 // Recorded rounds for the sales-demo buttons (found with the simulator).
 const SHOWCASE = { fs: 16983, hw: 5085, cw: 95 };
 
@@ -204,6 +204,9 @@ async function takeover(kicker, title, amountText, ms, amountTo = null) {
   skip();
 }
 
+// Crowd size for a win: 0 at 1x the bet, rising to 1 at 100x.
+const winSize = (amount) => Math.max(0, Math.min(1, Math.log10(Math.max(1, amount / bet())) / 2));
+
 // Celebrate in proportion to the win, measured against the bet.
 async function celebrate(amount) {
   const x = amount / bet();
@@ -211,6 +214,8 @@ async function celebrate(amount) {
   if (!tier) return;
   party(true);
   sfx.bigWin();
+  say(tier[2]);
+  applause(tier[3]);
   fx.coinShower(Math.min(160, 30 + Math.round(x * 1.5)), 2400);
   confetti.setStorm(4);
   await takeover('YOU WIN', tier[1], '0.00', Math.min(5200, 2200 + x * 30), amount);
@@ -232,6 +237,8 @@ function setParadeMeter(mult) {
 async function playFreeSpins(fs, scatterCount) {
   sfx.featureStart();
   party(true);
+  say('freespins');
+  applause(0.6);
   await takeover(`${scatterCount} SCATTERS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
   party(false);
   document.body.classList.add('fs');
@@ -254,7 +261,7 @@ async function playFreeSpins(fs, scatterCount) {
       led(`Parade multiplier · ${mult}x`, true);
     }
     const cells = markWins(spin.grid, spin.wins, spin.retrigger > 0);
-    if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); sfx.featureStart(); }
+    if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); sfx.featureStart(); say('retrigger'); applause(0.5); }
     if (spin.win > 0) {
       sfx.win();
       sparkleCells(cells, 8);
@@ -269,6 +276,8 @@ async function playFreeSpins(fs, scatterCount) {
   confetti.setStorm(1);
   alt.hidden = true;
   document.body.classList.remove('fs');
+  say('paradeover');
+  applause(winSize(total));
   await takeover('FREE SPINS COMPLETE', 'WHAT A PARADE', '0.00', 2600, total);
   setMood('base');
   return total;
@@ -277,6 +286,8 @@ async function playFreeSpins(fs, scatterCount) {
 async function playHoldAndWin(hw) {
   sfx.featureStart();
   party(true);
+  say('holdwin');
+  applause(0.5);
   await takeover(`${hw.start.length} DOUBLOONS`, 'HOLD & WIN', '3 RESPINS', 2400);
   party(false);
   clearWins();
@@ -319,6 +330,8 @@ async function playHoldAndWin(hw) {
         sfx.jackpot();
         document.querySelector(`.jp.${coin.jackpot.toLowerCase()}`)?.classList.add('hit');
         led(`${coin.jackpot} jackpot!`, true);
+        say(coin.jackpot.toLowerCase());
+        applause(coin.jackpot === 'MAJOR' ? 0.9 : 0.6);
       }
       running += coin.value * bet();
       $('win').textContent = money(running);
@@ -333,9 +346,12 @@ async function playHoldAndWin(hw) {
     sfx.jackpot();
     document.querySelector('.jp.grand').classList.add('hit');
     led('Board filled · GRAND JACKPOT!', true);
+    say('grand');
+    applause(1);
     await sleep(1500);
   }
   const total = hw.total * bet();
+  if (!hw.full) { say('totalwin'); applause(winSize(total)); }
   await takeover('DOUBLOON HOLD & WIN', 'TOTAL WIN', '0.00', 2600, total);
   $('respins').hidden = true;
   vaults.forEach((v) => v.remove());
@@ -347,6 +363,7 @@ async function playHoldAndWin(hw) {
 
 async function playClimbingWilds(round) {
   led('Krewe Wilds!', true);
+  say('krewe');
   sfx.wildClimb();
   for (const r of round.climbing) {
     const col = document.createElement('div');
@@ -391,7 +408,8 @@ async function spin(roundRng = rng) {
   const lineWin = (round.breakdown.base + round.breakdown.climbing + round.breakdown.scatter) * bet();
   const cells = markWins(round.grid, round.wins, round.scatter.count >= 3);
   if (lineWin > 0) {
-    if (lineWin >= bet()) { sfx.win(); sparkleCells(cells); } else sfx.smallWin();
+    // Wins of at least the bet get applause sized to the win; smaller ones only tick the meter.
+    if (lineWin >= bet()) { sfx.win(); sparkleCells(cells); if (lineWin < bet() * 10) applause(winSize(lineWin)); } else sfx.smallWin();
     led(`Win ${money(lineWin)}`, lineWin >= bet() * 5);
     await countUp($('win'), 0, lineWin, 500 + Math.min(1200, (lineWin / bet()) * 60));
     shownWin = lineWin;
@@ -415,7 +433,7 @@ async function spin(roundRng = rng) {
   const total = round.total * bet();
   $('win').textContent = money(total);
   await celebrate(total);
-  if (round.capped) led('Max win reached!', true);
+  if (round.capped) { led('Max win reached!', true); say('maxwin'); }
   else if (total > 0) led(`Total win ${money(total)}`);
   else led('Spin again · the parade rolls on');
 
@@ -451,6 +469,8 @@ $('startBtn').addEventListener('click', () => {
   unlock();
   sfx.featureStart();
   startTheme();
+  preloadVoices();
+  say('welcome');
   $('intro').hidden = true;
   $('spin').focus();
 });

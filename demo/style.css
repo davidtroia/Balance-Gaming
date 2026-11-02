@@ -33,6 +33,9 @@
   /* One grotesque family across the game: normal width for words, extra
      condensed and heavy for every number on a meter. */
   --ui: 'Archivo', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  /* Display face for meters, banners and tile letters: heavy wood type like
+     old parade posters. Swap this one line to try another face. */
+  --show: 'Ultra', 'Rockwell Extra Bold', 'Rockwell', Georgia, serif;
   font-family: var(--ui);
   color: var(--ink);
 }
@@ -100,7 +103,7 @@ body.hw .street { filter: brightness(.65); }
 }
 .t:not(.blank)::before { content: ""; position: absolute; inset: 8% 9%; border: max(1px, calc(var(--tw) * .035)) solid var(--pin); border-radius: 1px; opacity: .85; }
 .t b {
-  position: relative; font: 800 semi-condensed calc(var(--tw) * 1.12) / 1 var(--ui); color: var(--cobalt);
+  position: relative; font: 400 calc(var(--tw) * .9) / 1 var(--show); color: var(--cobalt);
   text-shadow: 0 0 .5px var(--cobalt), 0 1px 0 rgba(255, 255, 255, .5);
   opacity: calc(1 - var(--w) * .12);
 }
@@ -129,9 +132,9 @@ body.hw .street { filter: brightness(.65); }
   animation: sweep 4.5s ease-in-out infinite;
 }
 .jp b { font: 800 semi-condensed 11px var(--ui); letter-spacing: .22em; color: var(--green-hi); }
-.jp span { font: 900 extra-condensed clamp(18px, 2.2vw, 26px) var(--ui); font-variant-numeric: tabular-nums; color: var(--gold); text-shadow: 0 0 10px rgba(240, 194, 74, .5); }
+.jp span { font: 400 clamp(14px, 1.6vw, 19px) var(--show); font-variant-numeric: tabular-nums; color: var(--gold); text-shadow: 0 0 10px rgba(240, 194, 74, .5); }
 .jp.grand { background: linear-gradient(90deg, #4a1680, #7a2fd0); border: 2px solid var(--gold); }
-.jp.grand span { color: #fff; font-size: clamp(21px, 2.8vw, 32px); text-shadow: 0 0 14px rgba(255, 220, 120, .9); }
+.jp.grand span { color: #fff; font-size: clamp(16px, 2vw, 23px); text-shadow: 0 0 14px rgba(255, 220, 120, .9); }
 .jp.grand::after { animation-delay: 0s; } .jp.major::after { animation-delay: .4s; }
 .jp.minor::after { animation-delay: .8s; } .jp.mini::after { animation-delay: 1.2s; }
 .jp.hit { animation: jpFlash .25s steps(2) 10; }
@@ -194,10 +197,10 @@ body.hw .street { filter: brightness(.65); }
 @keyframes coinGlow { 50% { filter: drop-shadow(0 0 16px rgba(255, 220, 90, 1)); } }
 .cell .val, .slot .val {
   position: absolute; inset: 0; display: grid; place-items: center; text-align: center; z-index: 1; padding-top: 4%;
-  font: 900 extra-condensed clamp(15px, 2.7vw, 32px) var(--ui); color: #fff; letter-spacing: 0; font-variant-numeric: tabular-nums;
+  font: 400 clamp(11px, 2vw, 24px) var(--show); color: #fff; letter-spacing: 0; font-variant-numeric: tabular-nums;
   -webkit-text-stroke: 1.5px #3a0a5a; paint-order: stroke fill; text-shadow: 0 2px 0 #2a0640, 0 0 10px rgba(180, 107, 255, .9);
 }
-.cell .val.jackpot, .slot .val.jackpot { color: var(--gold-hi); font-stretch: condensed; font-size: clamp(11px, 2vw, 20px); letter-spacing: .04em; }
+.cell .val.jackpot, .slot .val.jackpot { color: var(--gold-hi); font-size: clamp(9px, 1.6vw, 16px); letter-spacing: .02em; }
 
 .reels.has-win .cell { opacity: .35; filter: saturate(.5); transition: opacity .2s; }
 .reels.has-win .cell.win { opacity: 1; filter: none; }
@@ -233,7 +236,7 @@ body.hw .reel .strip { display: none; }
 .parade-track { position: relative; height: 12px; border-radius: 99px; background: #07010c; border: 2px solid var(--gold); }
 .parade-fill { position: absolute; left: 0; top: 0; bottom: 0; width: var(--alt, 0%); border-radius: 99px; background: linear-gradient(90deg, var(--purple), var(--green), var(--gold)); transition: width .6s cubic-bezier(.2, 1.4, .4, 1); }
 .marker { position: absolute; top: 50%; left: var(--alt, 0%); translate: -50% -55%; font-size: 22px; color: var(--gold); text-shadow: 0 0 10px var(--gold); font-variant-emoji: text; transition: left .6s cubic-bezier(.2, 1.4, .4, 1); }
-.parade b { font: 900 extra-condensed 26px var(--ui); color: var(--gold); text-shadow: 0 0 10px rgba(240, 194, 74, .8); min-width: 2.6ch; text-align: right; }
+.parade b { font: 400 20px var(--show); color: var(--gold); text-shadow: 0 0 10px rgba(240, 194, 74, .8); min-width: 2.6ch; text-align: right; }
 .parade.bump b { animation: bump .45s; }
 
 /* high-limit mode at bet 100 and up: brighter rim and a badge */
@@ -253,7 +256,7 @@ body.high-limit .machine::after {
 }
 .meter { text-align: center; }
 .meter label { display: block; font: 700 semi-condensed 10px var(--ui); letter-spacing: .22em; opacity: .75; }
-.meter output { font: 900 extra-condensed clamp(22px, 3.2vw, 32px) / 1.05 var(--ui); color: var(--gold); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.meter output { font: 400 clamp(17px, 2.3vw, 25px) / 1.15 var(--show); color: var(--gold); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
 .meter.win output { color: var(--gold-hi); text-shadow: 0 0 12px rgba(240, 194, 74, .7); }
 .bet { display: flex; align-items: center; gap: 10px; }
 .side { display: flex; gap: 8px; }
@@ -344,7 +347,7 @@ body.high-limit .machine::after {
 .takeover-card { position: relative; text-align: center; padding: 0 16px; animation: slam .6s cubic-bezier(.2, 1.6, .4, 1) both; }
 .takeover-card small { display: block; margin-bottom: 14px; font: 800 semi-condensed clamp(14px, 3.6vw, 20px) var(--ui); letter-spacing: .3em; color: var(--green-hi); }
 .takeover-card h2 { margin: 0 0 16px; }
-.takeover-card p { margin: 0; font: 900 extra-condensed clamp(44px, 12vw, 88px) / 1 var(--ui); color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(180, 107, 255, .9), 0 4px 0 #000; }
+.takeover-card p { margin: 0; font: 400 clamp(32px, 9vw, 70px) / 1.1 var(--show); color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(180, 107, 255, .9), 0 4px 0 #000; }
 
 .intro { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: radial-gradient(ellipse at 50% 40%, rgba(58, 16, 96, .9), rgba(8, 1, 14, .97)); }
 .intro[hidden] { display: none; }
@@ -355,7 +358,7 @@ body.high-limit .machine::after {
 .intro .logo { --tw: clamp(24px, calc((100vw - 70px) / 11.4), 48px); }
 .story { margin: 0; font-size: 16px; line-height: 1.6; max-width: 46ch; color: #f4e8ff; text-shadow: 0 1px 2px #000; text-wrap: pretty; }
 .start {
-  cursor: pointer; padding: 16px 34px; margin-bottom: 7px; border-radius: 14px; border: 0; font: 800 semi-condensed 18px var(--ui); letter-spacing: .12em; text-transform: uppercase; color: #2a0b45;
+  cursor: pointer; padding: 16px 34px; margin-bottom: 7px; border-radius: 14px; border: 0; font: 400 16px var(--show); letter-spacing: .06em; text-transform: uppercase; color: #2a0b45;
   background: radial-gradient(ellipse 90% 60% at 50% 10%, #fffbe6, #f0c24a 55%, #b47a10); box-shadow: 0 7px 0 #6a4000, 0 9px 0 #2a1800, 0 0 0 3px var(--purple), 0 12px 30px rgba(240, 194, 74, .45);
   animation: breathe 2s ease-in-out infinite; transition: translate .06s, box-shadow .06s;
 }
@@ -402,7 +405,7 @@ dialog button:active { translate: 0 3px; box-shadow: 0 1px 0 var(--cobalt-lo); }
   .jp { justify-items: center; padding: 5px 4px 6px; }
   .jp:nth-of-type(n) { margin-left: 0; }
   .jp b { font-size: 10px; letter-spacing: .14em; }
-  .jp span, .jp.grand span { font-size: clamp(13px, 3.6vw, 18px); }
+  .jp span, .jp.grand span { font-size: clamp(11px, 3vw, 15px); }
 }
 @media (max-width: 560px) {
   .machine { padding: 16px 12px; border-radius: 20px; border-width: 5px; }

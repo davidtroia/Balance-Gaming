@@ -286,24 +286,20 @@ body.high-limit .machine::after {
 .cap:disabled { cursor: default; filter: saturate(.4) brightness(.7) drop-shadow(0 calc(var(--d) + 2px) 4px rgba(0, 0, 0, .65)); }
 .cap[aria-pressed="false"] .face { color: #9a8fb0; text-decoration: line-through; background: linear-gradient(180deg, #3a3550, #1c1830); }
 
-/* Spin: David's medallion art. The pressed frame swaps in while held, and
-   while the reels turn the medallion greys out and dims. */
-.spin {
-  position: relative; width: 148px; aspect-ratio: 427 / 406; margin-block: -10px; padding: 0; border: 0; background: none;
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .7));
-  animation: spinGlow 1.8s ease-in-out infinite;
-}
-.spin img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; }
-.spin .down { visibility: hidden; }
-.spin:active:not(:disabled) .up { visibility: hidden; }
-.spin:active:not(:disabled) .down { visibility: visible; }
-.spin:disabled { cursor: default; animation: none; }
-.spin:disabled img { filter: grayscale(.85) brightness(.6) contrast(.9); transition: filter .15s; }
-.spin.spinning .up { animation: spinPulse .5s ease-in-out infinite alternate; }
-
-.bet-meter { display: grid; justify-items: center; gap: 0; }
-.bet-meter .plaque { width: 82px; height: auto; margin: -6px 0 -4px; user-select: none; -webkit-user-drag: none; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .6)); }
+/* David's button art. Each button stacks its frames: the pressed frame
+   shows while held, and the spin's greyed frame while the reels turn. */
+.art-btn { position: relative; padding: 0; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.art-btn img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.art-btn .down, .art-btn .off { visibility: hidden; }
+.art-btn:active:not(:disabled) .up { visibility: hidden; }
+.art-btn:active:not(:disabled) .down { visibility: visible; }
+.art-btn:disabled { cursor: default; }
+.art-btn:disabled:not(.spin) img { filter: grayscale(.8) brightness(.6); }
+.spin:disabled .up, .spin:disabled .down { visibility: hidden; }
+.spin:disabled .off { visibility: visible; }
+.spin { width: 150px; aspect-ratio: 475 / 419; margin-block: -10px; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .7)); animation: spinGlow 1.8s ease-in-out infinite; }
+.spin:disabled { animation: none; }
+.bet-key { width: 108px; aspect-ratio: 432 / 215; filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .6)); }
 
 .showcase { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; }
 .showcase span { font: 800 11px var(--ui); letter-spacing: .16em; text-transform: uppercase; opacity: .75; }
@@ -346,18 +342,62 @@ body.high-limit .machine::after {
 .start:active { translate: 0 6px; box-shadow: 0 1px 0 #6a4000, 0 3px 0 #2a1800, 0 0 0 3px var(--purple), 0 4px 14px rgba(240, 194, 74, .4); }
 .intro-note { margin: 0; font-size: 12px; opacity: .75; }
 
-/* Rules read like a city sign: white field, cobalt text, blue border band. */
-dialog { max-width: min(600px, 92vw); border: 10px solid var(--cobalt); outline: 2px solid var(--grout); border-radius: 6px; background: var(--tile); color: #13265a; padding: 18px 20px; font-size: 14px; line-height: 1.55; box-shadow: 0 20px 60px rgba(0, 0, 0, .8); }
-dialog::backdrop { background: rgba(8, 1, 14, .7); }
-dialog h2.tiles { --tw: clamp(18px, 6vw, 28px); margin: 0 0 8px; box-shadow: 0 0 0 var(--g) var(--grout); }
-dialog b { color: var(--cobalt-lo); }
+/* Player guide: a tall card with the tile title, feature tabs, a controls
+   panel that labels David's button art, and numbered steps. */
+dialog.guide {
+  width: min(460px, 94vw); max-height: min(860px, 92svh); padding: 0; display: none; flex-direction: column; overflow: hidden;
+  border: 0; border-radius: 22px; color: var(--ink); font-size: 14.5px; line-height: 1.55;
+  background: radial-gradient(ellipse 120% 40% at 50% 0%, #3a1268, #170527 60%, #0d0218);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 0 5px #2a0b45, 0 30px 80px rgba(0, 0, 0, .85), 0 0 50px rgba(240, 194, 74, .3);
+}
+dialog.guide[open] { display: flex; }
+dialog::backdrop { background: rgba(8, 1, 14, .75); }
+.guide-head { flex-shrink: 0; position: relative; display: grid; justify-items: center; gap: 10px; padding: 18px 16px 12px; }
+.guide-head::before { content: ""; position: absolute; left: 14px; right: 14px; top: 0; height: 12px; background: var(--beads); opacity: .9; }
+.guide-back { position: absolute; left: 12px; top: 18px; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(240, 194, 74, .6); background: rgba(0, 0, 0, .3); color: var(--gold-hi); font: 400 26px/1 var(--ui); cursor: pointer; }
+.guide-badge { position: relative; width: clamp(58px, 9svh, 84px); aspect-ratio: 1; margin-top: 6px; }
+.guide-badge img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px #2a0b45, 0 0 24px rgba(240, 194, 74, .5); }
+.guide-crown { position: absolute; right: -10px; top: -12px; width: 34px; fill: var(--gold); rotate: 18deg; filter: drop-shadow(0 2px 2px #000); }
+dialog h2.tiles { --tw: clamp(20px, 6.4vw, 30px); margin: 0; }
+.guide-sub { margin: 0; font: 700 semi-condensed 12px var(--ui); letter-spacing: .24em; text-transform: uppercase; color: var(--purple-hi); }
+.guide-tabs { flex-shrink: 0; display: flex; gap: 0; overflow-x: auto; padding: 0 10px; border-block: 1px solid rgba(240, 194, 74, .25); background: rgba(0, 0, 0, .25); scrollbar-width: none; }
+.guide-tabs button {
+  flex: 1 0 auto; padding: 12px 9px 10px; border: 0; border-bottom: 3px solid transparent; background: none; cursor: pointer;
+  font: 800 semi-condensed 12.5px var(--ui); letter-spacing: .1em; text-transform: uppercase; color: #b9a6d6;
+}
+.guide-tabs button[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+.guide-body { flex: 1; overflow-y: auto; padding: 16px 20px 6px; }
+.guide-body h3 { margin: 0 0 6px; font: 400 20px var(--show); color: var(--gold-hi); }
+.guide-body p { margin: 0 0 12px; }
+.guide-body b { color: var(--gold-hi); }
+.guide-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; padding: 12px; border-radius: 14px; background: rgba(0, 0, 0, .3); border: 1px solid rgba(91, 226, 127, .3); }
+.guide-controls h4 { grid-column: 1 / -1; margin: 0; font: 800 semi-condensed 12px var(--ui); letter-spacing: .18em; text-transform: uppercase; color: var(--green-hi); }
+.ctl { display: grid; justify-items: center; text-align: center; gap: 4px; padding: 10px 8px; border-radius: 12px; background: linear-gradient(180deg, #2a0b45, #170527); border: 1px solid rgba(240, 194, 74, .3); }
+.ctl-pair { display: flex; gap: 6px; }
+.ctl-pair img { height: 40px !important; }
+.ctl img { height: 64px; width: auto; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .6)); }
+.ctl b { font: 800 semi-condensed 13px var(--ui); letter-spacing: .1em; text-transform: uppercase; color: var(--gold) !important; }
+.ctl span { font-size: 12px; line-height: 1.4; color: #cdbfe4; }
+.guide-steps { list-style: none; counter-reset: step; margin: 0 0 12px; padding: 0; display: grid; gap: 10px; }
+.guide-steps li { counter-increment: step; position: relative; padding-left: 38px; }
+.guide-steps li::before {
+  content: counter(step); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  font: 400 13px var(--show); color: #2a0b45; background: radial-gradient(circle at 35% 30%, #fffbe6, var(--gold) 60%, #b47a10);
+}
+.guide-facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 8px !important; }
+.guide-facts span { padding: 5px 10px; border-radius: 99px; background: rgba(0, 0, 0, .35); border: 1px solid rgba(240, 194, 74, .35); font-size: 12.5px; }
+.guide .small { font-size: 12px; opacity: .75; }
 .table-wrap { overflow-x: auto; }
-dialog table { width: 100%; border-collapse: collapse; margin: 10px 0; font-variant-numeric: tabular-nums; }
-dialog td, dialog th { padding: 4px 6px; border-bottom: 1px solid rgba(20, 47, 110, .18); text-align: center; }
-dialog td svg, dialog td img { width: 44px; height: 44px; border-radius: 8px; }
-dialog .small { font-size: 12px; opacity: .85; }
-dialog button { background: var(--cobalt); color: #fff; border: 0; border-radius: 8px; padding: 9px 22px; margin-bottom: 4px; font: 700 14px var(--ui); letter-spacing: .06em; cursor: pointer; box-shadow: 0 4px 0 var(--cobalt-lo), 0 6px 8px rgba(0, 0, 0, .3); transition: translate .06s, box-shadow .06s; }
-dialog button:active { translate: 0 3px; box-shadow: 0 1px 0 var(--cobalt-lo); }
+.guide table { width: 100%; border-collapse: collapse; margin: 6px 0; font-variant-numeric: tabular-nums; }
+.guide td, .guide th { padding: 4px 6px; border-bottom: 1px solid rgba(255, 255, 255, .08); text-align: center; }
+.guide th { font: 700 semi-condensed 11px var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--green-hi); }
+.guide td { font: 400 13px var(--show); color: var(--gold); }
+.guide td svg, .guide td img { width: 42px; height: 42px; border-radius: 8px; }
+.guide-foot { flex-shrink: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px 16px; border-top: 1px solid rgba(240, 194, 74, .25); background: rgba(0, 0, 0, .3); }
+.guide-foot button { padding: 12px 10px; margin-bottom: 4px; border-radius: 12px; cursor: pointer; font: 800 semi-condensed 14px var(--ui); letter-spacing: .14em; text-transform: uppercase; transition: translate .06s, box-shadow .06s; }
+.guide-foot .ghost { color: var(--ink); background: #22093a; border: 1.5px solid rgba(255, 255, 255, .18); box-shadow: 0 4px 0 #0a0212; }
+.guide-foot .go { color: #2a0b45; border: 0; background: radial-gradient(ellipse 90% 60% at 50% 10%, #fffbe6, #f0c24a 55%, #b47a10); box-shadow: 0 4px 0 #6a4000, 0 0 18px rgba(240, 194, 74, .45); }
+.guide-foot button:active { translate: 0 3px; box-shadow: 0 1px 0 #0a0212; }
 
 /* ---------- motion ---------- */
 @keyframes chase { 0% { background: var(--lit, #fff1b8); box-shadow: 0 0 10px 3px var(--lit, #f0c24a); } 33% { background: #3a1a40; box-shadow: none; } }
@@ -372,7 +412,6 @@ dialog button:active { translate: 0 3px; box-shadow: 0 1px 0 var(--cobalt-lo); }
 @keyframes spinGlow { 50% { filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .75)) drop-shadow(0 0 18px rgba(180, 107, 255, .9)); } }
 @keyframes bump { 50% { transform: scale(1.4); } }
 @keyframes spinIcon { to { transform: rotate(360deg); } }
-@keyframes spinPulse { to { filter: grayscale(.85) brightness(.75); } }
 @keyframes spinBurst { to { transform: rotate(360deg); } }
 @keyframes slam { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes breathe { 50% { transform: scale(1.05); } }
@@ -399,7 +438,8 @@ dialog button:active { translate: 0 3px; box-shadow: 0 1px 0 var(--cobalt-lo); }
   .parade-label { display: none; }
   .controls { grid-template-columns: 1fr 1fr; justify-items: center; }
   .bet { grid-column: 1; }
-  .spin { grid-column: 2; grid-row: 2 / span 2; width: 128px; }
+  .spin { grid-column: 2; grid-row: 2 / span 2; width: 140px; }
+  .bet-key { width: 78px; }
   .side { grid-column: 1; }
 }
 /* Reduce Motion stills the street (lamps, stars) and the spinning burst

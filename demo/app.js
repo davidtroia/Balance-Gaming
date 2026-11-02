@@ -206,11 +206,16 @@ function setTiles(el, text) {
   el.innerHTML = `<span class="tile-field" aria-hidden="true">${text.split('|').map((row) =>
     `<span class="tile-row">${row.split(/(?<= )/).map((w) => `<span class="tile-word">${[...w].map(tile).join('')}</span>`).join('')}</span>`).join('')}</span>`;
 }
-// David's button art: the spin medallion (normal and pressed) and the BET plaque.
+// David's button art: spin ring (normal, pressed, greyed) and BET − / BET +.
 const UI_ART = {
   spin: new URL('./img/btn-spin.webp', import.meta.url).href,
   spinPressed: new URL('./img/btn-spin-pressed.webp', import.meta.url).href,
-  betPlaque: new URL('./img/plaque-bet.webp', import.meta.url).href,
+  spinDisabled: new URL('./img/btn-spin-disabled.webp', import.meta.url).href,
+  betMinus: new URL('./img/btn-bet-minus.webp', import.meta.url).href,
+  betMinusPressed: new URL('./img/btn-bet-minus-pressed.webp', import.meta.url).href,
+  betPlus: new URL('./img/btn-bet-plus.webp', import.meta.url).href,
+  betPlusPressed: new URL('./img/btn-bet-plus-pressed.webp', import.meta.url).href,
+  icon: new URL('./img/icon.webp', import.meta.url).href,
 };
 document.querySelectorAll('[data-art]').forEach((img) => { img.src = UI_ART[img.dataset.art]; img.draggable = false; });
 
@@ -218,7 +223,7 @@ document.querySelectorAll('[data-tiles]').forEach((el) => setTiles(el, el.datase
 
 // Every 3D button clicks down and softly clicks back up.
 document.addEventListener('pointerdown', (e) => {
-  const b = e.target.closest('.cap, .spin, .start, .showcase button, dialog button');
+  const b = e.target.closest('.cap, .art-btn, .start, .showcase button, dialog button');
   if (!b || b.disabled) return;
   sfx.press();
   addEventListener('pointerup', () => sfx.release(), { once: true });
@@ -505,7 +510,14 @@ $('soundBtn').addEventListener('click', () => {
   $('soundBtn').setAttribute('aria-pressed', String(!isMuted()));
   $('soundBtn').setAttribute('aria-label', isMuted() ? 'Sound off' : 'Sound on');
 });
-$('infoBtn').addEventListener('click', () => { renderPaytable(); $('info').showModal(); });
+$('infoBtn').addEventListener('click', () => { renderPaytable(); showTab('basics'); $('info').showModal(); });
+// Player guide tabs.
+function showTab(name) {
+  document.querySelectorAll('.guide-tabs [data-tab]').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+  document.querySelectorAll('.guide [data-panel]').forEach((p) => { p.hidden = p.dataset.panel !== name; });
+  document.querySelector('.guide-body').scrollTop = 0;
+}
+document.querySelectorAll('.guide-tabs [data-tab]').forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab)));
 document.querySelectorAll('[data-show]').forEach((b) => b.addEventListener('click', () => spin(seededRng(SHOWCASE[b.dataset.show]))));
 $('startBtn').addEventListener('click', () => {
   unlock();

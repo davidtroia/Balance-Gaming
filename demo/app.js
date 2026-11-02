@@ -206,6 +206,14 @@ function setTiles(el, text) {
   el.innerHTML = `<span class="tile-field" aria-hidden="true">${text.split('|').map((row) =>
     `<span class="tile-row">${row.split(/(?<= )/).map((w) => `<span class="tile-word">${[...w].map(tile).join('')}</span>`).join('')}</span>`).join('')}</span>`;
 }
+// David's button art: the spin medallion (normal and pressed) and the BET plaque.
+const UI_ART = {
+  spin: new URL('./img/btn-spin.webp', import.meta.url).href,
+  spinPressed: new URL('./img/btn-spin-pressed.webp', import.meta.url).href,
+  betPlaque: new URL('./img/plaque-bet.webp', import.meta.url).href,
+};
+document.querySelectorAll('[data-art]').forEach((img) => { img.src = UI_ART[img.dataset.art]; img.draggable = false; });
+
 document.querySelectorAll('[data-tiles]').forEach((el) => setTiles(el, el.dataset.tiles));
 
 // Every 3D button clicks down and softly clicks back up.

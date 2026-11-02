@@ -10,6 +10,8 @@ export function unlock() {
   if (ctx) return;
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
+  // iPhone: play through the ringer/silent switch like a video would.
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* older iOS */ }
   ctx = new AC();
   master = ctx.createGain();
   master.gain.value = 0.55;
@@ -303,9 +305,18 @@ const VOICE = {
 const clips = {};
 let speaking = null;
 
+// The published page inlines each clip as a data: URI, and the page's
+// security policy can block fetch() on those, so decode them by hand.
+function bytesOf(url) {
+  if (!url.startsWith('data:')) return fetch(url).then((r) => r.arrayBuffer());
+  const bin = atob(url.slice(url.indexOf(',') + 1));
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return Promise.resolve(out.buffer);
+}
+
 function loadClip(name) {
-  clips[name] ??= fetch(VOICE[name])
-    .then((r) => r.arrayBuffer())
+  clips[name] ??= bytesOf(VOICE[name])
     .then((bytes) => new Promise((ok, fail) => ctx.decodeAudioData(bytes, ok, fail)))
     .catch(() => null);
   return clips[name];

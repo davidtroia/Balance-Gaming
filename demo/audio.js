@@ -180,11 +180,12 @@ export const sfx = {
 // and switching tracks crossfades between them. Hold & Win muffles the music
 // for tension, and big celebrations duck it so the fanfare cuts through.
 const TRACKS = {
-  base: new URL('./music/midnight-club.mp3', import.meta.url),
-  fs: new URL('./music/summit-run.mp3', import.meta.url),
+  base: new URL('./music/frenchmen-street.mp3', import.meta.url),
+  fs: new URL('./music/second-line-parade.mp3', import.meta.url),
+  hw: new URL('./music/doubloon-toss.mp3', import.meta.url),
 };
 const XFADE = 2;
-const MOODS = { base: { gain: 0.34, cutoff: 18000 }, fs: { gain: 0.4, cutoff: 18000 }, hw: { gain: 0.26, cutoff: 900 } };
+const MOODS = { base: { gain: 0.34, cutoff: 18000 }, fs: { gain: 0.4, cutoff: 18000 }, hw: { gain: 0.36, cutoff: 18000 } };
 const buffers = {};
 let music = null;
 let mood = 'base';
@@ -215,6 +216,7 @@ export async function startTheme() {
   bus.connect(filter).connect(master);
   music = { filter, bus };
   loadTrack('fs');
+  loadTrack('hw');
   playTrack('base');
 }
 
@@ -257,13 +259,13 @@ function playPass(p, at, fadeIn) {
 }
 
 export function setMood(next) {
-  const track = next === 'fs' ? 'fs' : 'base';
+  const track = TRACKS[next] ? next : 'base';
   mood = next;
   if (!music) return;
   const t = ctx.currentTime;
   music.bus.gain.setTargetAtTime(MOODS[mood].gain, t, 0.4);
   music.filter.frequency.setTargetAtTime(MOODS[mood].cutoff, t, 0.4);
-  if (player?.name !== track && next !== 'hw') playTrack(track);
+  if (player?.name !== track) playTrack(track);
 }
 
 // Pull the music down under a celebration, then bring it back.

@@ -5,7 +5,7 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices } from './audio.js';
+import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices } from './audio.js';
 import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
@@ -71,10 +71,12 @@ const coinLookup = (coins, r) => {
 };
 
 // Spin every reel down to its final symbols, stopping left to right.
+const reelMs = (r) => 520 + r * 180;
 function spinReels(grid, strips, coins = []) {
   clearWins();
   const cell = sizeCells();
   let scatters = 0;
+  const ticker = reelTicker(reelMs(grid.length - 1), grid.length);
   return Promise.all(grid.map((finalSyms, r) => new Promise((resolve) => {
     const strip = stripOf(r);
     const fillerCount = 16 + r * 5;
@@ -88,7 +90,7 @@ function spinReels(grid, strips, coins = []) {
     const distance = (fillerCount + C.ROWS) * cell;
     // The spin is the game, so the reels always roll. With Reduce Motion on
     // they skip the blur and the overshoot bounce instead of snapping.
-    const duration = 520 + r * 180;
+    const duration = reelMs(r);
     if (!reduced) reelEls[r].classList.add('blur');
     const anim = strip.animate(reduced ? [
       { transform: `translateY(${-distance}px)`, easing: 'cubic-bezier(.3,.1,.3,1)' },
@@ -102,6 +104,7 @@ function spinReels(grid, strips, coins = []) {
     anim.onfinish = () => {
       setReel(r, finalSyms, coinOf);
       sfx.reelStop(r);
+      ticker.reelStopped();
       const n = finalSyms.filter((s) => s === 'SCAT').length;
       if (n) { scatters += n; sfx.scatterLand(scatters); }
       if (finalSyms.includes('COIN')) sfx.coinLand();
@@ -182,11 +185,42 @@ async function countUp(el, from, to, ms, ticking = true) {
   }
 }
 
+// Spell words in New Orleans sidewalk street-name tiles: one letter per
+// 4 by 6 inch encaustic tile, set in grout inside a blue border band, like
+// the corner inlays (PRYTANIA, ESPLANADE). "|" starts a new row and a space
+// is a blank field tile. Each tile sits a hair off true, as hand-laid tile does.
+const esc = (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch] || ch);
+function setTiles(el, text) {
+  const label = text.replace(/\|/g, ' ').replace(/\s+/g, ' ').trim();
+  el.setAttribute('aria-label', label);
+  el.style.setProperty('--n', Math.max(...text.split('|').map((r) => r.length)));
+  let k = 0;
+  const tile = (ch) => {
+    k++;
+    const wob = (((k * 37 + ch.charCodeAt(0) * 11) % 9) - 4) * 0.22;
+    const wear = ((k * 53) % 7) / 7;
+    return ch === ' '
+      ? `<i class="t blank" style="--r:${wob}deg;--w:${wear}"></i>`
+      : `<i class="t" style="--r:${wob}deg;--w:${wear}"><b>${esc(ch)}</b></i>`;
+  };
+  el.innerHTML = `<span class="tile-field" aria-hidden="true">${text.split('|').map((row) =>
+    `<span class="tile-row">${row.split(/(?<= )/).map((w) => `<span class="tile-word">${[...w].map(tile).join('')}</span>`).join('')}</span>`).join('')}</span>`;
+}
+document.querySelectorAll('[data-tiles]').forEach((el) => setTiles(el, el.dataset.tiles));
+
+// Every 3D button clicks down and softly clicks back up.
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('.cap, .spin, .start, .showcase button, dialog button');
+  if (!b || b.disabled) return;
+  sfx.press();
+  addEventListener('pointerup', () => sfx.release(), { once: true });
+});
+
 // Full-screen takeover for feature intros and big wins. Tap to skip ahead.
 async function takeover(kicker, title, amountText, ms, amountTo = null) {
   const el = $('takeover');
   $('takeoverKicker').textContent = kicker;
-  $('takeoverTitle').textContent = title;
+  setTiles($('takeoverTitle'), title);
   $('takeoverAmount').textContent = amountText || '';
   el.hidden = false;
   duckTheme(ms);

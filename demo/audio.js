@@ -57,6 +57,56 @@ function noise(start, dur, { gain = 0.2, freq = 1200, q = 1, type = 'bandpass' }
 
 const NOTE = (n) => 440 * 2 ** ((n - 69) / 12);
 
+// One peg striking the wheel's leather flapper: a bright snap with a short
+// wooden body. Pitch steps up as reels lock, so tension climbs reel by reel.
+function clack(t, pitch, gain) {
+  const len = Math.ceil(ctx.sampleRate * 0.03);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 4;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const f = ctx.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = 2600 * pitch; f.Q.value = 2.2;
+  const g = ctx.createGain();
+  g.gain.value = gain;
+  src.connect(f).connect(g).connect(master);
+  src.start(t);
+  const o = ctx.createOscillator(), og = ctx.createGain();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(760 * pitch, t);
+  o.frequency.exponentialRampToValueAtTime(420 * pitch, t + 0.035);
+  og.gain.setValueAtTime(gain * 0.5, t);
+  og.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+  o.connect(og).connect(master);
+  o.start(t); o.stop(t + 0.06);
+}
+
+// Wheel-of-fortune ticking while the reels spin. It starts as a fast rattle,
+// slows like a wheel losing speed toward the last reel's stop, and climbs in
+// pitch each time a reel locks. Call reelStopped() on each stop and the
+// ticking ends by itself when every reel is down.
+export function reelTicker(totalMs, reels = 5) {
+  if (!ctx) return { reelStopped() {}, stop() {} };
+  const t0 = ctx.currentTime, end = t0 + totalMs / 1000;
+  let stopped = 0, next = t0 + 0.02, alive = true, timer;
+  const pump = () => {
+    if (!alive) return;
+    while (next < ctx.currentTime + 0.12 && next < end) {
+      const frac = (next - t0) / (end - t0);
+      clack(next, 1 + stopped * 0.09, 0.16 + stopped * 0.04 + Math.random() * 0.03);
+      next += 0.034 + 0.11 * frac ** 2.2;
+    }
+    if (next >= end) { alive = false; return; }
+    timer = setTimeout(pump, 40);
+  };
+  pump();
+  return {
+    reelStopped() { if (++stopped >= reels) this.stop(); },
+    stop() { alive = false; clearTimeout(timer); },
+  };
+}
+
 // A deep kick-drum thump: a sine that drops fast in pitch.
 const thump = (start = 0, gain = 0.5, freq = 120) => tone(freq, start, 0.28, { gain, slide: 0.35 });
 
@@ -95,6 +145,16 @@ export const sfx = {
     tone(NOTE(48), 0.8, 1.6, { type: 'sawtooth', gain: 0.08, attack: 0.05 });
   },
   tick() { tone(NOTE(100), 0, 0.03, { type: 'square', gain: 0.04 }); },
+  // A button keycap going down: a woody thock under a crisp switch click.
+  press() {
+    noise(0, 0.025, { gain: 0.35, freq: 3800, q: 3 });
+    tone(190, 0, 0.07, { type: 'triangle', gain: 0.22, slide: 0.6 });
+  },
+  // Letting go: a softer, higher click.
+  release() {
+    noise(0, 0.018, { gain: 0.14, freq: 5200, q: 4 });
+    tone(320, 0, 0.04, { type: 'triangle', gain: 0.07, slide: 0.8 });
+  },
   wildClimb() {
     tone(200, 0, 0.6, { type: 'sawtooth', gain: 0.12, slide: 4 });
     noise(0, 0.6, { gain: 0.12, freq: 3000, q: 0.5, type: 'highpass' });

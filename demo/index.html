@@ -7,7 +7,7 @@
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@700;900&family=Nunito:wght@600;800;900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -94,7 +94,7 @@
   <main class="cabinet" id="cabinet">
     <header class="marquee">
       <svg class="crest" aria-hidden="true"><use href="#fdl"/></svg>
-      <h1 class="logo"><span>Mardi Gras</span><span>Mayhem</span></h1>
+      <h1 class="logo tiles" data-tiles="MARDI GRAS|  MAYHEM  ">Mardi Gras Mayhem</h1>
     </header>
 
     <div class="stage">
@@ -132,14 +132,14 @@
       <div class="meter"><label>CREDITS</label><output id="balance"></output></div>
       <div class="meter win"><label>WIN</label><output id="win">0.00</output></div>
       <div class="bet">
-        <button id="betDown" class="round" aria-label="Lower bet">−</button>
+        <button id="betDown" class="cap" aria-label="Lower bet"><span class="face">−</span></button>
         <div class="meter"><label>BET</label><output id="bet"></output></div>
-        <button id="betUp" class="round" aria-label="Raise bet">+</button>
+        <button id="betUp" class="cap" aria-label="Raise bet"><span class="face">+</span></button>
       </div>
-      <button id="spin" class="spin" aria-label="Spin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 0 1 7.4 5H22l-3.5 4.5L15 9h2.2A6 6 0 1 0 18 14.5l1.9.7A8 8 0 1 1 12 4z"/></svg></button>
+      <button id="spin" class="spin" aria-label="Spin"><span class="dome"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a8 8 0 0 1 7.4 5H22l-3.5 4.5L15 9h2.2A6 6 0 1 0 18 14.5l1.9.7A8 8 0 1 1 12 4z"/></svg></span></button>
       <div class="side">
-        <button id="soundBtn" class="round" aria-label="Sound on" aria-pressed="true">♪</button>
-        <button id="infoBtn" class="round" aria-label="Game rules">i</button>
+        <button id="soundBtn" class="cap hex" aria-label="Sound on" aria-pressed="true"><span class="face">♪</span></button>
+        <button id="infoBtn" class="cap hex" aria-label="Game rules"><span class="face">i</span></button>
       </div>
     </footer>
 
@@ -158,7 +158,7 @@
     <div class="rays"></div>
     <div class="takeover-card">
       <small id="takeoverKicker"></small>
-      <h2 id="takeoverTitle"></h2>
+      <h2 id="takeoverTitle" class="tiles"></h2>
       <p id="takeoverAmount"></p>
     </div>
   </div>
@@ -167,7 +167,7 @@
     <div class="intro-card">
       <svg class="crest" aria-hidden="true"><use href="#fdl"/></svg>
       <p class="intro-kicker">A Balance Gaming original</p>
-      <h1 class="logo"><span>Mardi Gras</span><span>Mayhem</span></h1>
+      <h1 class="logo tiles" data-tiles="MARDI GRAS|  MAYHEM  ">Mardi Gras Mayhem</h1>
       <p class="story">It's Fat Tuesday in the French Quarter, and King Gator rules the parade. Catch gold doubloons to fill the Hold &amp; Win board, land three Free Spins symbols to join the parade, and every Wild that marches in raises your multiplier.</p>
       <button id="startBtn" class="start">Let the good times roll</button>
       <p class="intro-note">Sound on. Play credits only.</p>
@@ -175,7 +175,7 @@
   </div>
 
   <dialog id="info">
-    <h2>How to play</h2>
+    <h2 class="tiles" data-tiles="HOW TO PLAY">How to play</h2>
     <p><b>1,024 ways.</b> Match 3 or more symbols on adjacent reels from the left. Wilds land on reels 2 to 4 and stand in for every pay symbol.</p>
     <p><b>Krewe Wilds.</b> At random, whole reels turn Wild in the base game.</p>
     <p><b>Free Spins parade.</b> 3, 4 or 5 Free Spins symbols award 8, 12 or 20 free spins. Every Wild that lands raises the parade multiplier by 1x, up to 10x, for the rest of the feature. 3 Free Spins symbols during the feature add 5 more spins.</p>

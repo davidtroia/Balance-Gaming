@@ -413,3 +413,18 @@ export async function applause(size = 0.3) {
     src.start(ctx.currentTime + 0.15);
   }
 }
+
+// David's brass fanfare (take 1 of 3), played once over the ducked music
+// on a big win. To try another take, copy fanfare-2 or -3 to music/fanfare.mp3.
+const FANFARE = new URL('./music/fanfare.mp3', import.meta.url);
+let fanfareBuf = null;
+export async function fanfare(gain = 0.85) {
+  if (!ctx) return;
+  fanfareBuf ??= fetch(FANFARE).then((r) => r.arrayBuffer())
+    .then((b) => new Promise((ok, fail) => ctx.decodeAudioData(b, ok, fail))).catch(() => null);
+  const buf = await fanfareBuf;
+  if (!buf) return;
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = buf; g.gain.value = gain;
+  src.connect(g).connect(master); src.start();
+}

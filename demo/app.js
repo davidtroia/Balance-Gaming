@@ -5,7 +5,7 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices } from './audio.js';
+import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare } from './audio.js';
 import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
@@ -260,7 +260,7 @@ async function celebrate(amount) {
   const tier = TIERS.find(([min]) => x >= min);
   if (!tier) return;
   party(true);
-  sfx.bigWin();
+  fanfare();
   say(tier[2]);
   applause(tier[3]);
   fx.coinShower(Math.min(160, 30 + Math.round(x * 1.5)), 2400);

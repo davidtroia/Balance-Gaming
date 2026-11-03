@@ -190,6 +190,8 @@ body.hw .street { filter: brightness(.65); }
 .reel::after { bottom: 0; background: linear-gradient(transparent, #070d26); }
 .strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
 .reel.blur .strip { filter: blur(2.5px) brightness(1.1); }
+/* Phones repaint a blurred strip every frame and drop frames, so skip it there. */
+@media (hover: none), (max-width: 700px) { .reel.blur .strip { filter: none; } }
 .cell { position: relative; height: var(--cell); display: grid; place-items: center; padding: 4%; }
 .cell svg, .cell img { width: 100%; height: 100%; overflow: visible; transition: transform .25s; }
 .cell img, .slot img { object-fit: contain; border-radius: 12px; user-select: none; -webkit-user-drag: none; }
@@ -447,3 +449,6 @@ dialog h2.tiles { --tw: clamp(20px, 6.4vw, 30px); margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   .world *, .takeover .rays { animation: none !important; transition: none !important; }
 }
+/* Phone: the cabinet is zoomed to fit the screen (see fitPhone in app.js). */
+body.fitted { overflow-x: hidden; }
+body.fitted .cabinet { margin: 0 auto; max-width: none; box-sizing: border-box; }

@@ -71,7 +71,7 @@ const coinLookup = (coins, r) => {
 };
 
 // Spin every reel down to its final symbols, stopping left to right.
-const reelMs = (r) => 520 + r * 180;
+const reelMs = (r) => 950 + r * 240;
 function spinReels(grid, strips, coins = []) {
   clearWins();
   const cell = sizeCells();
@@ -93,12 +93,12 @@ function spinReels(grid, strips, coins = []) {
     const duration = reelMs(r);
     if (!reduced) reelEls[r].classList.add('blur');
     const anim = strip.animate(reduced ? [
-      { transform: `translateY(${-distance}px)`, easing: 'cubic-bezier(.3,.1,.3,1)' },
-      { transform: 'translateY(0)' },
+      { transform: `translate3d(0,${-distance}px,0)`, easing: 'cubic-bezier(.3,.1,.3,1)' },
+      { transform: 'translate3d(0,0,0)' },
     ] : [
-      { transform: `translateY(${-distance}px)`, easing: 'cubic-bezier(.45,.05,.55,1)' },
-      { transform: `translateY(${cell * 0.24}px)`, offset: 0.86, easing: 'cubic-bezier(.2,1.6,.4,1)' },
-      { transform: 'translateY(0)' },
+      { transform: `translate3d(0,${-distance}px,0)`, easing: 'cubic-bezier(.45,.05,.55,1)' },
+      { transform: `translate3d(0,${cell * 0.24}px,0)`, offset: 0.86, easing: 'cubic-bezier(.2,1.6,.4,1)' },
+      { transform: 'translate3d(0,0,0)' },
     ], { duration });
     setTimeout(() => reelEls[r].classList.remove('blur'), duration * 0.75);
     anim.onfinish = () => {
@@ -547,3 +547,20 @@ sizeCells();
 opening.forEach((syms, r) => setReel(r, syms, (row) => (syms[row] === 'COIN' ? { value: 2 } : null)));
 placeBulbs();
 requestAnimationFrame(() => { sizeCells(); placeBulbs(); });
+
+// ---------- fit the whole cabinet on a phone screen ----------
+// Phones lay the cabinet out at one design width, then zoom it so the
+// marquee, jackpots, reels and controls all fit without scrolling.
+const PHONE_W = 430;
+function fitPhone() {
+  const cab = $('cabinet');
+  if (innerWidth > 700) { cab.style.zoom = ''; cab.style.width = ''; document.body.classList.remove('fitted'); return; }
+  document.body.classList.add('fitted');
+  cab.style.zoom = 1;
+  cab.style.width = `${PHONE_W}px`;
+  const z = Math.min(innerWidth / PHONE_W, innerHeight / cab.scrollHeight);
+  cab.style.zoom = z.toFixed(4);
+  sizeCells(); placeBulbs();
+}
+addEventListener('resize', fitPhone);
+fitPhone();

@@ -425,10 +425,18 @@ export async function applause(size = 0.3) {
   }
 }
 
-// David's brass fanfare (take 1 of 3), played once over the ducked music
-// on a big win. To try another take, copy fanfare-2 or -3 to music/fanfare.mp3.
+// David's brass fanfare (the last 4 seconds of take 1), played once over the
+// ducked music on a big win. stopFanfare() fades it out when the next spin starts.
 const FANFARE = new URL('./music/fanfare.mp3', import.meta.url);
 let fanfareBuf = null;
+let fanfareNow = null;
+export function stopFanfare() {
+  if (!fanfareNow) return;
+  const { src, g } = fanfareNow;
+  fanfareNow = null;
+  g.gain.setTargetAtTime(0, ctx.currentTime, 0.08);
+  try { src.stop(ctx.currentTime + 0.4); } catch { /* already ended */ }
+}
 export async function fanfare(gain = 0.85) {
   if (!ctx) return;
   fanfareBuf ??= fetch(FANFARE).then((r) => r.arrayBuffer())
@@ -438,4 +446,6 @@ export async function fanfare(gain = 0.85) {
   const src = ctx.createBufferSource(), g = ctx.createGain();
   src.buffer = buf; g.gain.value = gain;
   src.connect(g).connect(master); src.start();
+  fanfareNow = { src, g };
+  src.onended = () => { if (fanfareNow?.src === src) fanfareNow = null; };
 }

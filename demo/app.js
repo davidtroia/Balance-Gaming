@@ -5,7 +5,7 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare } from './audio.js';
+import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare, stopFanfare } from './audio.js';
 import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
@@ -432,6 +432,7 @@ async function playClimbingWilds(round) {
 
 async function spin(roundRng = rng) {
   if (busy) return;
+  stopFanfare();
   if (balance < bet()) {
     balance += 10000;
     renderHud();

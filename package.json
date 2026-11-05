@@ -1,0 +1,10 @@
+{
+  "name": "balance-gaming",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "sim": "node sim/simulate.js",
+    "demo": "node scripts/serve.js"
+  }
+}

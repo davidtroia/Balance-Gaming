@@ -1,4 +1,4 @@
-// Canvas effects: drifting snow behind the game, and coin showers and
+// Canvas effects: drifting confetti behind the game, and doubloon showers and
 // sparkle bursts in front of it.
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -12,26 +12,35 @@ function fitCanvas(canvas) {
   return g;
 }
 
-export function startSnow(canvas) {
+// Mardi Gras confetti: purple, green and gold flakes that tumble as they fall.
+const CONFETTI = ['#9b4dff', '#7a2fd0', '#2fc45a', '#1f9e46', '#f3c440', '#ffe08a'];
+export function startConfetti(canvas) {
   let g = fitCanvas(canvas);
   addEventListener('resize', () => { g = fitCanvas(canvas); });
-  const flakes = Array.from({ length: 70 }, () => ({
-    x: Math.random(), y: Math.random(), r: 0.6 + Math.random() * 1.8, s: 0.2 + Math.random() * 0.6, d: Math.random() * 6,
+  const bits = Array.from({ length: 60 }, () => ({
+    x: Math.random(), y: Math.random(), w: 4 + Math.random() * 5, h: 7 + Math.random() * 6,
+    s: 0.25 + Math.random() * 0.6, d: Math.random() * 6, spin: Math.random() * 6, vs: 0.02 + Math.random() * 0.05,
+    color: CONFETTI[Math.floor(Math.random() * CONFETTI.length)],
   }));
   let storm = 1;
   function frame(t) {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     g.clearRect(0, 0, w, h);
-    g.fillStyle = 'rgba(240,214,150,.6)';
-    for (const f of flakes) {
+    for (const b of bits) {
       if (!reduced) {
-        f.y += (f.s * storm) / h * 1.6;
-        f.x += Math.sin(t / 1400 + f.d) * 0.0004 * storm;
-        if (f.y > 1.02) { f.y = -0.02; f.x = Math.random(); }
+        b.y += (b.s * storm) / h * 1.6;
+        b.x += Math.sin(t / 1400 + b.d) * 0.0005 * storm;
+        b.spin += b.vs * storm;
+        if (b.y > 1.02) { b.y = -0.02; b.x = Math.random(); }
       }
-      g.beginPath();
-      g.arc(f.x * w, f.y * h, f.r, 0, Math.PI * 2);
-      g.fill();
+      g.save();
+      g.translate(b.x * w, b.y * h);
+      g.rotate(b.d + b.spin * 0.6);
+      g.scale(1, Math.cos(b.spin));
+      g.globalAlpha = 0.75;
+      g.fillStyle = b.color;
+      g.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+      g.restore();
     }
     requestAnimationFrame(frame);
   }
@@ -104,7 +113,7 @@ export function createOverlay(canvas) {
         if (made >= count) clearInterval(timer);
       }, ms / Math.max(1, count / 4));
     },
-    sparkle(x, y, n = 18, colors = ['#fff6cf', '#ffd36b', '#ff9a3c']) {
+    sparkle(x, y, n = 18, colors = ['#fff6cf', '#ffd36b', '#b46bff', '#4ee07a']) {
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2, s = 1 + Math.random() * 4;
         parts.push({ kind: 'spark', x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, grav: 0.05,

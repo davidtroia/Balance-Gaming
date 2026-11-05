@@ -5,11 +5,11 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, setMuted, isMuted, startTheme, setMood, duckTheme } from './audio.js';
-import { startSnow, createOverlay } from './fx.js';
+import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare, stopFanfare } from './audio.js';
+import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
-const TIERS = [[100, 'LEGENDARY'], [50, 'EPIC WIN'], [25, 'MEGA WIN'], [10, 'BIG WIN']];
+const TIERS = [[100, 'LEGENDARY', 'legendary', 1], [50, 'EPIC WIN', 'epicwin', 0.9], [25, 'MEGA WIN', 'megawin', 0.75], [10, 'BIG WIN', 'bigwin', 0.6]];
 // Recorded rounds for the sales-demo buttons (found with the simulator).
 const SHOWCASE = { fs: 16983, hw: 5085, cw: 95 };
 
@@ -29,7 +29,7 @@ let busy = false;
 const bet = () => BETS[betIdx];
 
 document.body.insertAdjacentHTML('afterbegin', SVG_DEFS);
-const snow = startSnow($('snow'));
+const confetti = startConfetti($('confetti'));
 const fx = createOverlay($('fx'));
 
 // ---------- reels ----------
@@ -71,10 +71,12 @@ const coinLookup = (coins, r) => {
 };
 
 // Spin every reel down to its final symbols, stopping left to right.
+const reelMs = (r) => 950 + r * 240;
 function spinReels(grid, strips, coins = []) {
   clearWins();
   const cell = sizeCells();
   let scatters = 0;
+  const ticker = reelTicker(reelMs(grid.length - 1), grid.length);
   return Promise.all(grid.map((finalSyms, r) => new Promise((resolve) => {
     const strip = stripOf(r);
     const fillerCount = 16 + r * 5;
@@ -88,20 +90,21 @@ function spinReels(grid, strips, coins = []) {
     const distance = (fillerCount + C.ROWS) * cell;
     // The spin is the game, so the reels always roll. With Reduce Motion on
     // they skip the blur and the overshoot bounce instead of snapping.
-    const duration = 520 + r * 180;
+    const duration = reelMs(r);
     if (!reduced) reelEls[r].classList.add('blur');
     const anim = strip.animate(reduced ? [
-      { transform: `translateY(${-distance}px)`, easing: 'cubic-bezier(.3,.1,.3,1)' },
-      { transform: 'translateY(0)' },
+      { transform: `translate3d(0,${-distance}px,0)`, easing: 'cubic-bezier(.3,.1,.3,1)' },
+      { transform: 'translate3d(0,0,0)' },
     ] : [
-      { transform: `translateY(${-distance}px)`, easing: 'cubic-bezier(.45,.05,.55,1)' },
-      { transform: `translateY(${cell * 0.24}px)`, offset: 0.86, easing: 'cubic-bezier(.2,1.6,.4,1)' },
-      { transform: 'translateY(0)' },
+      { transform: `translate3d(0,${-distance}px,0)`, easing: 'cubic-bezier(.45,.05,.55,1)' },
+      { transform: `translate3d(0,${cell * 0.24}px,0)`, offset: 0.86, easing: 'cubic-bezier(.2,1.6,.4,1)' },
+      { transform: 'translate3d(0,0,0)' },
     ], { duration });
     setTimeout(() => reelEls[r].classList.remove('blur'), duration * 0.75);
     anim.onfinish = () => {
       setReel(r, finalSyms, coinOf);
       sfx.reelStop(r);
+      ticker.reelStopped();
       const n = finalSyms.filter((s) => s === 'SCAT').length;
       if (n) { scatters += n; sfx.scatterLand(scatters); }
       if (finalSyms.includes('COIN')) sfx.coinLand();
@@ -182,11 +185,55 @@ async function countUp(el, from, to, ms, ticking = true) {
   }
 }
 
+// Spell words in New Orleans sidewalk street-name tiles: one letter per
+// 4 by 6 inch encaustic tile, set in grout inside a blue border band, like
+// the corner inlays (PRYTANIA, ESPLANADE). "|" starts a new row and a space
+// is a blank field tile. Each tile sits a hair off true, as hand-laid tile does.
+const esc = (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch] || ch);
+function setTiles(el, text) {
+  const label = text.replace(/\|/g, ' ').replace(/\s+/g, ' ').trim();
+  el.setAttribute('aria-label', label);
+  el.style.setProperty('--n', Math.max(...text.split('|').map((r) => r.length)));
+  let k = 0;
+  const tile = (ch) => {
+    k++;
+    const wob = (((k * 37 + ch.charCodeAt(0) * 11) % 9) - 4) * 0.22;
+    const wear = ((k * 53) % 7) / 7;
+    return ch === ' '
+      ? `<i class="t blank" style="--r:${wob}deg;--w:${wear}"></i>`
+      : `<i class="t" style="--r:${wob}deg;--w:${wear}"><b>${esc(ch)}</b></i>`;
+  };
+  el.innerHTML = `<span class="tile-field" aria-hidden="true">${text.split('|').map((row) =>
+    `<span class="tile-row">${row.split(/(?<= )/).map((w) => `<span class="tile-word">${[...w].map(tile).join('')}</span>`).join('')}</span>`).join('')}</span>`;
+}
+// David's button art: spin ring (normal, pressed, greyed) and BET − / BET +.
+const UI_ART = {
+  spin: new URL('./img/btn-spin.webp', import.meta.url).href,
+  spinPressed: new URL('./img/btn-spin-pressed.webp', import.meta.url).href,
+  spinDisabled: new URL('./img/btn-spin-disabled.webp', import.meta.url).href,
+  betMinus: new URL('./img/btn-bet-minus.webp', import.meta.url).href,
+  betMinusPressed: new URL('./img/btn-bet-minus-pressed.webp', import.meta.url).href,
+  betPlus: new URL('./img/btn-bet-plus.webp', import.meta.url).href,
+  betPlusPressed: new URL('./img/btn-bet-plus-pressed.webp', import.meta.url).href,
+  icon: new URL('./img/icon.webp', import.meta.url).href,
+};
+document.querySelectorAll('[data-art]').forEach((img) => { img.src = UI_ART[img.dataset.art]; img.draggable = false; });
+
+document.querySelectorAll('[data-tiles]').forEach((el) => setTiles(el, el.dataset.tiles));
+
+// Every 3D button clicks down and softly clicks back up.
+document.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('.cap, .art-btn, .start, .showcase button, dialog button');
+  if (!b || b.disabled) return;
+  sfx.press();
+  addEventListener('pointerup', () => sfx.release(), { once: true });
+});
+
 // Full-screen takeover for feature intros and big wins. Tap to skip ahead.
 async function takeover(kicker, title, amountText, ms, amountTo = null) {
   const el = $('takeover');
   $('takeoverKicker').textContent = kicker;
-  $('takeoverTitle').textContent = title;
+  setTiles($('takeoverTitle'), title);
   $('takeoverAmount').textContent = amountText || '';
   el.hidden = false;
   duckTheme(ms);
@@ -204,58 +251,64 @@ async function takeover(kicker, title, amountText, ms, amountTo = null) {
   skip();
 }
 
+// Crowd size for a win: 0 at 1x the bet, rising to 1 at 100x.
+const winSize = (amount) => Math.max(0, Math.min(1, Math.log10(Math.max(1, amount / bet())) / 2));
+
 // Celebrate in proportion to the win, measured against the bet.
 async function celebrate(amount) {
   const x = amount / bet();
   const tier = TIERS.find(([min]) => x >= min);
   if (!tier) return;
   party(true);
-  sfx.bigWin();
+  fanfare();
+  say(tier[2]);
+  applause(tier[3]);
   fx.coinShower(Math.min(160, 30 + Math.round(x * 1.5)), 2400);
-  snow.setStorm(4);
+  confetti.setStorm(4);
   await takeover('YOU WIN', tier[1], '0.00', Math.min(5200, 2200 + x * 30), amount);
-  snow.setStorm(1);
+  confetti.setStorm(1);
   party(false);
 }
 
 // ---------- features ----------
 
-const ALT_TOP = 8849; // metres at the 10x cap, the height of Everest
-function setAltitude(mult) {
+// Free spins parade meter: every Wild raises the multiplier, up to 10x.
+function setParadeMeter(mult) {
   const pct = ((mult - 1) / (C.FS_MULT_CAP - 1)) * 100;
-  $('altFill').style.height = `${pct}%`;
-  $('climber').style.bottom = `${pct}%`;
-  $('altitude').style.setProperty('--alt', `${pct}%`);
-  $('altMult').textContent = `${mult}x`;
-  $('altMeters').textContent = `${Math.round(1000 + ((mult - 1) * (ALT_TOP - 1000)) / (C.FS_MULT_CAP - 1)).toLocaleString('en-US')} m`;
+  $('paradeFill').style.height = `${pct}%`;
+  $('marker').style.bottom = `${pct}%`;
+  $('parade').style.setProperty('--alt', `${pct}%`);
+  $('paradeMult').textContent = `${mult}x`;
 }
 
 async function playFreeSpins(fs, scatterCount) {
   sfx.featureStart();
   party(true);
-  await takeover(`${scatterCount} SUMMITS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
+  say('freespins');
+  applause(0.6);
+  await takeover(`${scatterCount} SCATTERS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
   party(false);
   document.body.classList.add('fs');
   setMood('fs');
-  snow.setStorm(2.5);
-  const alt = $('altitude');
+  confetti.setStorm(2.5);
+  const alt = $('parade');
   alt.hidden = false;
-  setAltitude(1);
+  setParadeMeter(1);
   let total = 0, mult = 1;
   for (const [i, spin] of fs.spins.entries()) {
     led(`Free spin ${i + 1} · ${spin.remaining} left`);
     await spinReels(spin.grid, reels.free);
     if (spin.multiplier > mult) {
       mult = spin.multiplier;
-      setAltitude(mult);
+      setParadeMeter(mult);
       sfx.multiplierUp();
       alt.classList.remove('bump'); void alt.offsetWidth; alt.classList.add('bump');
-      const b = $('climber').getBoundingClientRect();
-      fx.sparkle(b.left + b.width / 2, b.top + b.height / 2, 24, ['#38e0a0', '#9b6bff', '#ffcf5a']);
-      led(`Altitude up · ${mult}x`, true);
+      const b = $('marker').getBoundingClientRect();
+      fx.sparkle(b.left + b.width / 2, b.top + b.height / 2, 24, ['#4ee07a', '#b46bff', '#ffd36b']);
+      led(`Parade multiplier · ${mult}x`, true);
     }
     const cells = markWins(spin.grid, spin.wins, spin.retrigger > 0);
-    if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); sfx.featureStart(); }
+    if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); sfx.featureStart(); say('retrigger'); applause(0.5); }
     if (spin.win > 0) {
       sfx.win();
       sparkleCells(cells, 8);
@@ -267,10 +320,12 @@ async function playFreeSpins(fs, scatterCount) {
       await sleep(350);
     }
   }
-  snow.setStorm(1);
+  confetti.setStorm(1);
   alt.hidden = true;
   document.body.classList.remove('fs');
-  await takeover('FREE SPINS COMPLETE', 'SUMMIT REACHED', '0.00', 2600, total);
+  say('paradeover');
+  applause(winSize(total));
+  await takeover('FREE SPINS COMPLETE', 'WHAT A PARADE', '0.00', 2600, total);
   setMood('base');
   return total;
 }
@@ -278,7 +333,9 @@ async function playFreeSpins(fs, scatterCount) {
 async function playHoldAndWin(hw) {
   sfx.featureStart();
   party(true);
-  await takeover(`${hw.start.length} GOLD COINS`, 'HOLD & WIN', '3 RESPINS', 2400);
+  say('holdwin');
+  applause(0.5);
+  await takeover(`${hw.start.length} DOUBLOONS`, 'HOLD & WIN', '3 RESPINS', 2400);
   party(false);
   clearWins();
   document.body.classList.add('hw');
@@ -320,6 +377,8 @@ async function playHoldAndWin(hw) {
         sfx.jackpot();
         document.querySelector(`.jp.${coin.jackpot.toLowerCase()}`)?.classList.add('hit');
         led(`${coin.jackpot} jackpot!`, true);
+        say(coin.jackpot.toLowerCase());
+        applause(coin.jackpot === 'MAJOR' ? 0.9 : 0.6);
       }
       running += coin.value * bet();
       $('win').textContent = money(running);
@@ -327,17 +386,20 @@ async function playHoldAndWin(hw) {
     }
     left = step.respinsLeft;
     showLamps(left);
-    if (step.landed.length) led('New coin! Respins reset to 3', true);
+    if (step.landed.length) led('New doubloon! Respins reset to 3', true);
     await sleep(500);
   }
   if (hw.full) {
     sfx.jackpot();
     document.querySelector('.jp.grand').classList.add('hit');
-    led('Vault filled · GRAND JACKPOT!', true);
+    led('Board filled · GRAND JACKPOT!', true);
+    say('grand');
+    applause(1);
     await sleep(1500);
   }
   const total = hw.total * bet();
-  await takeover('TREASURE VAULT', 'HOLD & WIN', '0.00', 2600, total);
+  if (!hw.full) { say('totalwin'); applause(winSize(total)); }
+  await takeover('DOUBLOON HOLD & WIN', 'TOTAL WIN', '0.00', 2600, total);
   $('respins').hidden = true;
   vaults.forEach((v) => v.remove());
   document.querySelectorAll('.jp.hit').forEach((j) => j.classList.remove('hit'));
@@ -347,7 +409,8 @@ async function playHoldAndWin(hw) {
 }
 
 async function playClimbingWilds(round) {
-  led('Climbing Wilds!', true);
+  led('Krewe Wilds!', true);
+  say('krewe');
   sfx.wildClimb();
   for (const r of round.climbing) {
     const col = document.createElement('div');
@@ -369,6 +432,7 @@ async function playClimbingWilds(round) {
 
 async function spin(roundRng = rng) {
   if (busy) return;
+  stopFanfare();
   if (balance < bet()) {
     balance += 10000;
     renderHud();
@@ -392,7 +456,8 @@ async function spin(roundRng = rng) {
   const lineWin = (round.breakdown.base + round.breakdown.climbing + round.breakdown.scatter) * bet();
   const cells = markWins(round.grid, round.wins, round.scatter.count >= 3);
   if (lineWin > 0) {
-    if (lineWin >= bet()) { sfx.win(); sparkleCells(cells); } else sfx.smallWin();
+    // Wins of at least the bet get applause sized to the win; smaller ones only tick the meter.
+    if (lineWin >= bet()) { sfx.win(); sparkleCells(cells); if (lineWin < bet() * 10) applause(winSize(lineWin)); } else sfx.smallWin();
     led(`Win ${money(lineWin)}`, lineWin >= bet() * 5);
     await countUp($('win'), 0, lineWin, 500 + Math.min(1200, (lineWin / bet()) * 60));
     shownWin = lineWin;
@@ -416,9 +481,9 @@ async function spin(roundRng = rng) {
   const total = round.total * bet();
   $('win').textContent = money(total);
   await celebrate(total);
-  if (round.capped) led('Max win reached!', true);
+  if (round.capped) { led('Max win reached!', true); say('maxwin'); }
   else if (total > 0) led(`Total win ${money(total)}`);
-  else led('Spin again to keep climbing');
+  else led('Spin again · the parade rolls on');
 
   balance += total;
   renderHud();
@@ -446,12 +511,21 @@ $('soundBtn').addEventListener('click', () => {
   $('soundBtn').setAttribute('aria-pressed', String(!isMuted()));
   $('soundBtn').setAttribute('aria-label', isMuted() ? 'Sound off' : 'Sound on');
 });
-$('infoBtn').addEventListener('click', () => { renderPaytable(); $('info').showModal(); });
+$('infoBtn').addEventListener('click', () => { renderPaytable(); showTab('basics'); $('info').showModal(); });
+// Player guide tabs.
+function showTab(name) {
+  document.querySelectorAll('.guide-tabs [data-tab]').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+  document.querySelectorAll('.guide [data-panel]').forEach((p) => { p.hidden = p.dataset.panel !== name; });
+  document.querySelector('.guide-body').scrollTop = 0;
+}
+document.querySelectorAll('.guide-tabs [data-tab]').forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab)));
 document.querySelectorAll('[data-show]').forEach((b) => b.addEventListener('click', () => spin(seededRng(SHOWCASE[b.dataset.show]))));
 $('startBtn').addEventListener('click', () => {
   unlock();
   sfx.featureStart();
   startTheme();
+  preloadVoices();
+  say('welcome');
   $('intro').hidden = true;
   $('spin').focus();
 });
@@ -474,3 +548,20 @@ sizeCells();
 opening.forEach((syms, r) => setReel(r, syms, (row) => (syms[row] === 'COIN' ? { value: 2 } : null)));
 placeBulbs();
 requestAnimationFrame(() => { sizeCells(); placeBulbs(); });
+
+// ---------- fit the whole cabinet on a phone screen ----------
+// Phones lay the cabinet out at one design width, then zoom it so the
+// marquee, jackpots, reels and controls all fit without scrolling.
+const PHONE_W = 430;
+function fitPhone() {
+  const cab = $('cabinet');
+  if (innerWidth > 700) { cab.style.zoom = ''; cab.style.width = ''; document.body.classList.remove('fitted'); return; }
+  document.body.classList.add('fitted');
+  cab.style.zoom = 1;
+  cab.style.width = `${PHONE_W}px`;
+  const z = Math.min(innerWidth / PHONE_W, innerHeight / cab.scrollHeight);
+  cab.style.zoom = z.toFixed(4);
+  sizeCells(); placeBulbs();
+}
+addEventListener('resize', fitPhone);
+fitPhone();

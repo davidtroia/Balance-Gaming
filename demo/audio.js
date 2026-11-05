@@ -1,6 +1,6 @@
-// Synthesized sound effects with the Web Audio API, so there are no audio
-// files to ship. Browsers only allow sound after the player taps something,
-// so unlock() is called from the Start button.
+// Sound: synthesized effects with the Web Audio API, the theme music, the
+// game-show host's voice lines and crowd applause. Browsers only allow sound
+// after the player taps something, so unlock() is called from the Start button.
 
 let ctx = null;
 let master = null;
@@ -10,6 +10,8 @@ export function unlock() {
   if (ctx) return;
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
+  // iPhone: play through the ringer/silent switch like a video would.
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* older iOS */ }
   ctx = new AC();
   master = ctx.createGain();
   master.gain.value = 0.55;
@@ -57,6 +59,56 @@ function noise(start, dur, { gain = 0.2, freq = 1200, q = 1, type = 'bandpass' }
 
 const NOTE = (n) => 440 * 2 ** ((n - 69) / 12);
 
+// One peg striking the wheel's leather flapper: a bright snap with a short
+// wooden body. Pitch steps up as reels lock, so tension climbs reel by reel.
+function clack(t, pitch, gain) {
+  const len = Math.ceil(ctx.sampleRate * 0.03);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 4;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const f = ctx.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = 2600 * pitch; f.Q.value = 2.2;
+  const g = ctx.createGain();
+  g.gain.value = gain;
+  src.connect(f).connect(g).connect(master);
+  src.start(t);
+  const o = ctx.createOscillator(), og = ctx.createGain();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(760 * pitch, t);
+  o.frequency.exponentialRampToValueAtTime(420 * pitch, t + 0.035);
+  og.gain.setValueAtTime(gain * 0.5, t);
+  og.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+  o.connect(og).connect(master);
+  o.start(t); o.stop(t + 0.06);
+}
+
+// Wheel-of-fortune ticking while the reels spin. It starts as a fast rattle,
+// slows like a wheel losing speed toward the last reel's stop, and climbs in
+// pitch each time a reel locks. Call reelStopped() on each stop and the
+// ticking ends by itself when every reel is down.
+export function reelTicker(totalMs, reels = 5) {
+  if (!ctx) return { reelStopped() {}, stop() {} };
+  const t0 = ctx.currentTime, end = t0 + totalMs / 1000;
+  let stopped = 0, next = t0 + 0.02, alive = true, timer;
+  const pump = () => {
+    if (!alive) return;
+    while (next < ctx.currentTime + 0.12 && next < end) {
+      const frac = (next - t0) / (end - t0);
+      clack(next, 1 + stopped * 0.09, 0.16 + stopped * 0.04 + Math.random() * 0.03);
+      next += 0.034 + 0.11 * frac ** 2.2;
+    }
+    if (next >= end) { alive = false; return; }
+    timer = setTimeout(pump, 40);
+  };
+  pump();
+  return {
+    reelStopped() { if (++stopped >= reels) this.stop(); },
+    stop() { alive = false; clearTimeout(timer); },
+  };
+}
+
 // A deep kick-drum thump: a sine that drops fast in pitch.
 const thump = (start = 0, gain = 0.5, freq = 120) => tone(freq, start, 0.28, { gain, slide: 0.35 });
 
@@ -95,6 +147,16 @@ export const sfx = {
     tone(NOTE(48), 0.8, 1.6, { type: 'sawtooth', gain: 0.08, attack: 0.05 });
   },
   tick() { tone(NOTE(100), 0, 0.03, { type: 'square', gain: 0.04 }); },
+  // A button keycap going down: a woody thock under a crisp switch click.
+  press() {
+    noise(0, 0.025, { gain: 0.35, freq: 3800, q: 3 });
+    tone(190, 0, 0.07, { type: 'triangle', gain: 0.22, slide: 0.6 });
+  },
+  // Letting go: a softer, higher click.
+  release() {
+    noise(0, 0.018, { gain: 0.14, freq: 5200, q: 4 });
+    tone(320, 0, 0.04, { type: 'triangle', gain: 0.07, slide: 0.8 });
+  },
   wildClimb() {
     tone(200, 0, 0.6, { type: 'sawtooth', gain: 0.12, slide: 4 });
     noise(0, 0.6, { gain: 0.12, freq: 3000, q: 0.5, type: 'highpass' });
@@ -120,11 +182,12 @@ export const sfx = {
 // and switching tracks crossfades between them. Hold & Win muffles the music
 // for tension, and big celebrations duck it so the fanfare cuts through.
 const TRACKS = {
-  base: new URL('./music/midnight-club.mp3', import.meta.url),
-  fs: new URL('./music/summit-run.mp3', import.meta.url),
+  base: new URL('./music/frenchmen-street.mp3', import.meta.url),
+  fs: new URL('./music/second-line-parade.mp3', import.meta.url),
+  hw: new URL('./music/doubloon-toss.mp3', import.meta.url),
 };
 const XFADE = 2;
-const MOODS = { base: { gain: 0.34, cutoff: 18000 }, fs: { gain: 0.4, cutoff: 18000 }, hw: { gain: 0.26, cutoff: 900 } };
+const MOODS = { base: { gain: 0.34, cutoff: 18000 }, fs: { gain: 0.4, cutoff: 18000 }, hw: { gain: 0.36, cutoff: 18000 } };
 const buffers = {};
 let music = null;
 let mood = 'base';
@@ -155,6 +218,7 @@ export async function startTheme() {
   bus.connect(filter).connect(master);
   music = { filter, bus };
   loadTrack('fs');
+  loadTrack('hw');
   playTrack('base');
 }
 
@@ -197,13 +261,13 @@ function playPass(p, at, fadeIn) {
 }
 
 export function setMood(next) {
-  const track = next === 'fs' ? 'fs' : 'base';
+  const track = TRACKS[next] ? next : 'base';
   mood = next;
   if (!music) return;
   const t = ctx.currentTime;
   music.bus.gain.setTargetAtTime(MOODS[mood].gain, t, 0.4);
   music.filter.frequency.setTargetAtTime(MOODS[mood].cutoff, t, 0.4);
-  if (player?.name !== track && next !== 'hw') playTrack(track);
+  if (player?.name !== track) playTrack(track);
 }
 
 // Pull the music down under a celebration, then bring it back.
@@ -212,4 +276,176 @@ export function duckTheme(ms) {
   const t = ctx.currentTime;
   music.bus.gain.setTargetAtTime(MOODS[mood].gain * 0.25, t, 0.08);
   music.bus.gain.setTargetAtTime(MOODS[mood].gain, t + ms / 1000, 0.6);
+}
+
+// ---------- host voice and crowd ----------
+
+// Lines read by the game-show host. They were generated with the Kokoro
+// text-to-speech model (Apache-2.0) and mastered with a little room reverb.
+// cheer.mp3 is a small crowd shouting, built the same way from many voices.
+const VOICE = {
+  welcome: new URL('./voice/welcome.mp3', import.meta.url).href,
+  freespins: new URL('./voice/freespins.mp3', import.meta.url).href,
+  retrigger: new URL('./voice/retrigger.mp3', import.meta.url).href,
+  paradeover: new URL('./voice/paradeover.mp3', import.meta.url).href,
+  holdwin: new URL('./voice/holdwin.mp3', import.meta.url).href,
+  totalwin: new URL('./voice/totalwin.mp3', import.meta.url).href,
+  bigwin: new URL('./voice/bigwin.mp3', import.meta.url).href,
+  megawin: new URL('./voice/megawin.mp3', import.meta.url).href,
+  epicwin: new URL('./voice/epicwin.mp3', import.meta.url).href,
+  legendary: new URL('./voice/legendary.mp3', import.meta.url).href,
+  krewe: new URL('./voice/krewe.mp3', import.meta.url).href,
+  mini: new URL('./voice/mini.mp3', import.meta.url).href,
+  minor: new URL('./voice/minor.mp3', import.meta.url).href,
+  major: new URL('./voice/major.mp3', import.meta.url).href,
+  grand: new URL('./voice/grand.mp3', import.meta.url).href,
+  maxwin: new URL('./voice/maxwin.mp3', import.meta.url).href,
+  cheer: new URL('./voice/cheer.mp3', import.meta.url).href,
+};
+const clips = {};
+let speaking = null;
+
+// The published page inlines each clip as a data: URI, and the page's
+// security policy can block fetch() on those, so decode them by hand.
+function bytesOf(url) {
+  if (!url.startsWith('data:')) return fetch(url).then((r) => r.arrayBuffer());
+  const bin = atob(url.slice(url.indexOf(',') + 1));
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return Promise.resolve(out.buffer);
+}
+
+function loadClip(name) {
+  clips[name] ??= bytesOf(VOICE[name])
+    .then((bytes) => new Promise((ok, fail) => ctx.decodeAudioData(bytes, ok, fail)))
+    .catch(() => null);
+  return clips[name];
+}
+
+// Decode every line up front so the host never lags behind the screen.
+export function preloadVoices() {
+  if (!ctx) return;
+  Object.keys(VOICE).forEach(loadClip);
+  buildApplause();
+}
+
+// The host announces one line; a new line cuts off the one before it.
+export async function say(name) {
+  if (!ctx) return;
+  const buffer = await loadClip(name);
+  if (!buffer) return;
+  try { speaking?.stop(); } catch { /* already finished */ }
+  const src = ctx.createBufferSource();
+  const g = ctx.createGain();
+  g.gain.value = 1.1;
+  src.buffer = buffer;
+  src.connect(g).connect(master);
+  src.start();
+  speaking = src;
+  duckTheme(buffer.duration * 1000 + 400);
+}
+
+// Applause is rendered offline once, from hundreds of tiny noise-burst claps
+// over a soft crowd roar, at three sizes: polite, warm and a standing ovation.
+const CLAPS = [{ secs: 1.6, rate: 30, roar: 0 }, { secs: 3, rate: 70, roar: 0.25 }, { secs: 5, rate: 130, roar: 0.5 }];
+let applauseBuffers = null;
+
+function buildApplause() {
+  if (applauseBuffers || !window.OfflineAudioContext) return;
+  applauseBuffers = Promise.all(CLAPS.map(({ secs, rate, roar }) => {
+    const sr = 44100;
+    const off = new OfflineAudioContext(2, Math.ceil(sr * secs), sr);
+    const clap = off.createBuffer(1, Math.ceil(sr * 0.04), sr);
+    const d = clap.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sr * 0.006));
+    // Crowd intensity: swells in fast, holds, then tails away.
+    const env = (t) => Math.min(1, t / 0.25) * Math.min(1, Math.max(0, (secs - t) / (secs * 0.45)));
+    for (let n = Math.round(rate * secs); n > 0; n--) {
+      const t = Math.random() * secs;
+      if (Math.random() > env(t)) continue;
+      const src = off.createBufferSource();
+      src.buffer = clap;
+      src.playbackRate.value = 0.7 + Math.random() * 0.7;
+      const bp = off.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 900 + Math.random() * 1800;
+      bp.Q.value = 1.1;
+      const g = off.createGain();
+      g.gain.value = 0.25 + Math.random() * 0.75;
+      const pan = off.createStereoPanner();
+      pan.pan.value = Math.random() * 1.6 - 0.8;
+      src.connect(bp).connect(g).connect(pan).connect(off.destination);
+      src.start(t);
+    }
+    if (roar) {
+      const noise = off.createBuffer(1, Math.ceil(sr * secs), sr);
+      const nd = noise.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < nd.length; i++) { last = last * 0.97 + (Math.random() * 2 - 1) * 0.03; nd[i] = last * 6; }
+      const src = off.createBufferSource();
+      src.buffer = noise;
+      const lp = off.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 1100;
+      const g = off.createGain();
+      g.gain.setValueAtTime(0, 0);
+      g.gain.linearRampToValueAtTime(roar, 0.4);
+      g.gain.setValueAtTime(roar, secs * 0.55);
+      g.gain.linearRampToValueAtTime(0, secs);
+      src.connect(lp).connect(g).connect(off.destination);
+      src.start(0);
+    }
+    return off.startRendering();
+  })).catch(() => null);
+}
+
+// Crowd reaction to a win. size 0 is polite applause, 1 a standing ovation
+// with cheering; anything from 0.5 up brings in the cheer.
+export async function applause(size = 0.3) {
+  if (!ctx) return;
+  buildApplause();
+  const buffers = await applauseBuffers;
+  if (buffers) {
+    const src = ctx.createBufferSource();
+    const g = ctx.createGain();
+    src.buffer = buffers[size >= 0.75 ? 2 : size >= 0.35 ? 1 : 0];
+    g.gain.value = 0.35 + size * 0.35;
+    src.connect(g).connect(master);
+    src.start();
+  }
+  if (size >= 0.5) {
+    const cheer = await loadClip('cheer');
+    if (!cheer) return;
+    const src = ctx.createBufferSource();
+    const g = ctx.createGain();
+    src.buffer = cheer;
+    g.gain.value = 0.35 + size * 0.4;
+    src.connect(g).connect(master);
+    src.start(ctx.currentTime + 0.15);
+  }
+}
+
+// David's brass fanfare (the last 4 seconds of take 1), played once over the
+// ducked music on a big win. stopFanfare() fades it out when the next spin starts.
+const FANFARE = new URL('./music/fanfare.mp3', import.meta.url);
+let fanfareBuf = null;
+let fanfareNow = null;
+export function stopFanfare() {
+  if (!fanfareNow) return;
+  const { src, g } = fanfareNow;
+  fanfareNow = null;
+  g.gain.setTargetAtTime(0, ctx.currentTime, 0.08);
+  try { src.stop(ctx.currentTime + 0.4); } catch { /* already ended */ }
+}
+export async function fanfare(gain = 0.85) {
+  if (!ctx) return;
+  fanfareBuf ??= fetch(FANFARE).then((r) => r.arrayBuffer())
+    .then((b) => new Promise((ok, fail) => ctx.decodeAudioData(b, ok, fail))).catch(() => null);
+  const buf = await fanfareBuf;
+  if (!buf) return;
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = buf; g.gain.value = gain;
+  src.connect(g).connect(master); src.start();
+  fanfareNow = { src, g };
+  src.onended = () => { if (fanfareNow?.src === src) fanfareNow = null; };
 }

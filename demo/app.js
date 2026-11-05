@@ -555,7 +555,8 @@ requestAnimationFrame(() => { sizeCells(); placeBulbs(); });
 const PHONE_W = 430;
 function fitPhone() {
   const cab = $('cabinet');
-  if (innerWidth > 700) { cab.style.zoom = ''; cab.style.width = ''; document.body.classList.remove('fitted'); return; }
+  const phone = innerWidth <= 700 || (matchMedia('(pointer: coarse)').matches && innerHeight <= 500);
+  if (!phone) { cab.style.zoom = ''; cab.style.width = ''; document.body.classList.remove('fitted'); return; }
   document.body.classList.add('fitted');
   cab.style.zoom = 1;
   cab.style.width = `${PHONE_W}px`;

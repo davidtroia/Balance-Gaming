@@ -331,7 +331,7 @@ body.high-limit .machine::after {
 .takeover-card h2 { margin: 0 0 16px; }
 .takeover-card p { margin: 0; font: 400 clamp(32px, 9vw, 70px) / 1.1 var(--show); color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(180, 107, 255, .9), 0 4px 0 #000; }
 
-.intro { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; background: radial-gradient(ellipse at 50% 40%, rgba(58, 16, 96, .9), rgba(8, 1, 14, .97)); }
+.intro { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 20px; overflow-y: auto; background: radial-gradient(ellipse at 50% 40%, rgba(58, 16, 96, .9), rgba(8, 1, 14, .97)); }
 .intro[hidden] { display: none; }
 .intro-card { max-width: 580px; text-align: center; display: grid; gap: 14px; justify-items: center; animation: slam .8s cubic-bezier(.2, 1.4, .4, 1) both; }
 .intro-card .crest { width: 54px; height: 54px; }
@@ -455,3 +455,11 @@ dialog h2.tiles { --tw: clamp(20px, 6.4vw, 30px); margin: 0; }
 /* Phone: the cabinet is zoomed to fit the screen (see fitPhone in app.js). */
 body.fitted { overflow-x: hidden; }
 body.fitted .cabinet { margin: 0 auto; max-width: none; box-sizing: border-box; }
+/* Phone held sideways: shrink the intro so the start button fits without scrolling. */
+@media (max-height: 500px) {
+  .intro { padding: 10px; }
+  .intro-card { gap: 6px; }
+  .intro-card .crest { width: 32px; height: 32px; }
+  .intro .logo { --tw: clamp(18px, 5.2vh, 30px); }
+  .intro-card p:not(.intro-kicker):not(.intro-note) { font-size: 13px; margin: 0; }
+}

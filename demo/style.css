@@ -1,3 +1,6 @@
+/* David's own street-tile faces: Weathered for the logo tiles, Clean for banners and meters. */
+@font-face { font-family: 'MayhemStreet'; src: url("fonts/MayhemStreet-Clean.ttf") format('truetype'); font-display: block; }
+@font-face { font-family: 'MayhemStreetWeathered'; src: url("fonts/MayhemStreet-Weathered.ttf") format('truetype'); font-display: block; }
 /* Mardi Gras Mayhem: an ornate gold cabinet strung with purple, green and
    gold beads, standing in a French Quarter street on Fat Tuesday night.
    Two colour layers: purple, green and gold for the game itself (symbols,
@@ -35,7 +38,7 @@
   --ui: 'Archivo', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
   /* Display face for meters, banners and tile letters: heavy wood type like
      old parade posters. Swap this one line to try another face. */
-  --show: 'Ultra', 'Rockwell Extra Bold', 'Rockwell', Georgia, serif;
+  --show: 'MayhemStreet', 'Ultra', 'Rockwell Extra Bold', 'Rockwell', Georgia, serif;
   font-family: var(--ui);
   color: var(--ink);
 }
@@ -103,7 +106,7 @@ body.hw .street { filter: brightness(.65); }
 }
 .t:not(.blank)::before { content: ""; position: absolute; inset: 8% 9%; border: max(1px, calc(var(--tw) * .035)) solid var(--pin); border-radius: 1px; opacity: .85; }
 .t b {
-  position: relative; font: 400 calc(var(--tw) * .9) / 1 var(--show); color: var(--cobalt);
+  position: relative; font: 400 calc(var(--tw) * .9) / 1 'MayhemStreetWeathered', var(--show); color: var(--cobalt);
   text-shadow: 0 0 .5px var(--cobalt), 0 1px 0 rgba(255, 255, 255, .5);
   opacity: calc(1 - var(--w) * .12);
 }

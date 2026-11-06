@@ -246,6 +246,7 @@ const UI_ART = {
   betPlus: new URL('./img/btn-bet-plus.webp', import.meta.url).href,
   betPlusPressed: new URL('./img/btn-bet-plus-pressed.webp', import.meta.url).href,
   icon: new URL('./img/icon.webp', import.meta.url).href,
+  studio: new URL('./img/balance-digital.webp', import.meta.url).href,
   crestTop: new URL('./img/frame-crest-top.webp', import.meta.url).href,
   crestBottom: new URL('./img/frame-crest-bottom.webp', import.meta.url).href,
 };

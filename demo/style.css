@@ -516,3 +516,11 @@ body.fitted .cabinet { margin: 0 auto; max-width: none; box-sizing: border-box; 
 }
 body.fitted .marquee .skyline { width: 430px; bottom: 0; }
 @media (max-height: 860px) { .window { --s: .2; } }
+
+/* Studio branding: a large mark on the start screen, a quiet one under the
+   game and in the guide, where operators expect to find the studio credit. */
+.studio-logo { display: block; width: clamp(120px, 34vw, 190px); height: auto; margin: 4px auto 10px; }
+.studio-mark { display: block; width: 96px; height: auto; margin: 6px auto 0; opacity: .7; }
+.guide-studio { display: grid; justify-items: center; gap: 4px; margin: 14px 0 6px; font: 600 11px var(--ui); opacity: .8; }
+body.fitted > .cabinet .studio-mark { display: none; }
+@media (max-height: 500px) { .studio-logo { width: 84px; margin: 0 auto 4px; } }

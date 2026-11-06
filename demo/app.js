@@ -609,11 +609,11 @@ document.querySelectorAll('.guide-tabs [data-tab]').forEach((t) => t.addEventLis
     btn.textContent = `Host voice: ${david ? "David's" : 'Original'}`;
     btn.setAttribute('aria-pressed', String(david));
   };
-  try { setVoiceSet(localStorage.getItem('mgm-voice')); } catch { /* storage blocked */ }
+  try { setVoiceSet(localStorage.getItem('mgm-voice-v2')); } catch { /* storage blocked */ }
   show();
   btn.addEventListener('click', () => {
     setVoiceSet(getVoiceSet() === 'david' ? 'ai' : 'david');
-    try { localStorage.setItem('mgm-voice', getVoiceSet()); } catch { /* storage blocked */ }
+    try { localStorage.setItem('mgm-voice-v2', getVoiceSet()); } catch { /* storage blocked */ }
     show();
     say(['bigwin', 'megawin', 'epicwin'][Math.floor(Math.random() * 3)]);
   });

@@ -317,8 +317,8 @@ const DAVID = {
   megawin: new URL('./voice/d-megawin.mp3', import.meta.url).href,
   epicwin: new URL('./voice/d-epicwin.mp3', import.meta.url).href,
 };
-let voiceSet = 'ai';
-export function setVoiceSet(set) { voiceSet = set === 'david' ? 'david' : 'ai'; }
+let voiceSet = 'david';
+export function setVoiceSet(set) { if (set === 'david' || set === 'ai') voiceSet = set; }
 export function getVoiceSet() { return voiceSet; }
 const clips = {};
 let speaking = null;

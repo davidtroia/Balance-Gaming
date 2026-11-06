@@ -213,24 +213,28 @@ async function countUp(el, from, to, ms, ticking = true, abort = () => false) {
 
 // Spell words in New Orleans sidewalk street-name tiles: one letter per
 // 4 by 6 inch encaustic tile, set in grout inside a blue border band, like
-// the corner inlays (PRYTANIA, ESPLANADE). "|" starts a new row and a space
+// splits words with a gap of blue band. Each tile sits a hair off true, as hand-laid tile does.
 // is a blank field tile. Each tile sits a hair off true, as hand-laid tile does.
 const esc = (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch] || ch);
 function setTiles(el, text) {
   const label = text.replace(/\|/g, ' ').replace(/\s+/g, ' ').trim();
   el.setAttribute('aria-label', label);
-  el.style.setProperty('--n', Math.max(...text.split('|').map((r) => r.length)));
+  el.style.setProperty('--n', Math.max(...text.split('|').map((r) => r.trim().length)));
   let k = 0;
+  // Every letter is a real tile; spaces are gaps of blue band between
+  // words. Wear is fixed per letter position so the logo always looks
+  // the same: a few hairline cracks and the odd chipped corner.
   const tile = (ch) => {
     k++;
     const wob = (((k * 37 + ch.charCodeAt(0) * 11) % 9) - 4) * 0.22;
     const wear = ((k * 53) % 7) / 7;
-    return ch === ' '
-      ? `<i class="t blank" style="--r:${wob}deg;--w:${wear}"></i>`
-      : `<i class="t" style="--r:${wob}deg;--w:${wear}"><b>${esc(ch)}</b></i>`;
+    const crack = ['', 'c1', '', 'c2', '', '', 'c3'][(k * 5) % 7];
+    const chip = k % 6 === 2 ? 'chip-tr' : k % 7 === 5 ? 'chip-bl' : '';
+    return `<i class="t ${crack} ${chip}" style="--r:${wob}deg;--w:${wear}"><b>${esc(ch)}</b></i>`;
   };
+  const words = (row) => row.trim().split(/\s+/).filter(Boolean);
   el.innerHTML = `<span class="tile-field" aria-hidden="true">${text.split('|').map((row) =>
-    `<span class="tile-row">${row.split(/(?<= )/).map((w) => `<span class="tile-word">${[...w].map(tile).join('')}</span>`).join('')}</span>`).join('')}</span>`;
+    `<span class="tile-row">${words(row).map((w) => `<span class="tile-word">${[...w].map(tile).join('')}</span>`).join('')}</span>`).join('')}</span>`;
 }
 // David's button art: spin ring (normal, pressed, greyed) and BET − / BET +.
 const UI_ART = {

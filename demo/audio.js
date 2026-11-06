@@ -359,7 +359,7 @@ export async function say(name) {
   try { speaking?.stop(); } catch { /* already finished */ }
   const src = ctx.createBufferSource();
   const g = ctx.createGain();
-  g.gain.value = 1.1;
+  g.gain.value = voiceSet === 'david' && DAVID[name] ? 0.9 : 1.1;
   src.buffer = buffer;
   src.connect(g).connect(master);
   src.start();

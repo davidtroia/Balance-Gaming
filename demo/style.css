@@ -53,13 +53,10 @@ button:focus-visible { outline: 3px solid var(--green-hi); outline-offset: 3px; 
 
 /* ---------- the street ---------- */
 .world { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--night); }
-.street { position: absolute; inset: 0; width: 100%; height: 100%; }
-.street .lamps circle { animation: flicker 4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-.street .lamps circle:nth-child(2) { animation-delay: -1.7s; }
-.street .stars circle { animation: twinkle 3s ease-in-out infinite; }
-.street .stars circle:nth-child(3n) { animation-delay: -1s; } .street .stars circle:nth-child(3n+1) { animation-delay: -2s; }
+.street { position: absolute; inset: 0; background: var(--street-wide) center 70% / cover no-repeat; }
+@media (orientation: portrait) { .street { background-image: var(--street-tall); background-position: center 60%; } }
 .confetti { position: absolute; inset: 0; width: 100%; height: 100%; }
-.world::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 45%, transparent 40%, rgba(8, 1, 14, .7)); }
+.world::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(8, 1, 14, .25) 30%, rgba(8, 1, 14, .78)); }
 
 body.fs .street { filter: brightness(1.25) saturate(1.25); }
 body.hw .street { filter: brightness(.65); }
@@ -68,7 +65,7 @@ body.hw .street { filter: brightness(.65); }
 /* ---------- cabinet ---------- */
 .cabinet {
   position: relative; z-index: 1; margin: 0 auto;
-  width: min(1180px, 100%, max(600px, calc((100svh - 290px) * 1.5)));
+  width: min(1180px, 100%, max(600px, calc((100svh - 300px) * 1.5)));
   padding-block: 12px 28px; padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px));
   display: grid; gap: 14px;
 }
@@ -172,6 +169,8 @@ body.hw .street { filter: brightness(.65); }
   box-shadow: 0 0 0 2px #2a0b45, 0 30px 60px rgba(0, 0, 0, .8), 0 0 40px rgba(240, 194, 74, .45), 0 0 120px rgba(138, 43, 226, .35);
   animation: rimGlow 4s ease-in-out infinite;
 }
+.machine { padding: 0; border: 0; background: none; box-shadow: none; animation: none; }
+.machine > .corner, .machine > .bulbs { display: none; }
 .corner { position: absolute; width: 48px; height: 48px; z-index: 4; fill: url(#gFrame); filter: drop-shadow(0 0 8px rgba(240, 194, 74, .7)) drop-shadow(0 2px 2px #000); pointer-events: none; }
 .corner.tl { top: -24px; left: -24px; rotate: -45deg; } .corner.tr { top: -24px; right: -24px; rotate: 45deg; }
 .corner.bl { bottom: -24px; left: -24px; rotate: -135deg; } .corner.br { bottom: -24px; right: -24px; rotate: 135deg; }
@@ -195,13 +194,21 @@ body.hw .street { filter: brightness(.65); }
 .led.flash span { animation: ledFlash .18s steps(2) 8; }
 
 .window {
-  position: relative; border-radius: 14px; padding: 6px;
-  background: linear-gradient(180deg, #ffe08a, #b47a10 50%, #ffe08a);
-  box-shadow: 0 0 0 3px #12041f, 0 0 24px rgba(240, 194, 74, .4);
+  /* David's painted reel frame (art/painted/reel-frame.png), drawn as a
+     9-slice border so it fits any reel size. The two fleur-de-lis crests
+     sit on top at their true shape so they never squash. */
+  --s: .28;
+  position: relative; padding: 0;
+  border-style: solid;
+  border-width: calc(222px * var(--s)) calc(136px * var(--s)) calc(249px * var(--s)) calc(135px * var(--s));
+  border-image-source: var(--frame-art); border-image-slice: 222 136 249 135; border-image-width: 1; border-image-repeat: stretch;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .75)) drop-shadow(0 0 22px rgba(240, 194, 74, .35));
 }
-.window::before, .window::after { content: ""; position: absolute; left: 14px; right: 14px; height: 12px; z-index: 5; background: var(--beads); pointer-events: none; }
-.window::before { top: -12px; } .window::after { bottom: -12px; }
-.reels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; border-radius: 10px; overflow: hidden; }
+.window .crest-top, .window .crest-bottom { position: absolute; left: 50%; translate: -50% 0; z-index: 6; pointer-events: none; }
+.window .crest-top { top: calc(-222px * var(--s)); width: calc(340px * var(--s)); }
+.window .crest-bottom { top: 100%; width: calc(260px * var(--s)); }
+body.fitted .window { --s: .14; }
+.reels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; overflow: hidden; background: linear-gradient(90deg, #8a5a00, #ffe08a 50%, #8a5a00); }
 .reel {
   position: relative; overflow: hidden; aspect-ratio: 1 / 3.4;
   background: radial-gradient(ellipse at 50% 50%, #142456, #070d26 80%);
@@ -507,3 +514,4 @@ body.fitted .cabinet { margin: 0 auto; max-width: none; box-sizing: border-box; 
   .intro-card p:not(.intro-kicker):not(.intro-note) { font-size: 13px; margin: 0; }
 }
 body.fitted .marquee .skyline { width: 430px; bottom: 0; }
+@media (max-height: 860px) { .window { --s: .2; } }

@@ -309,6 +309,17 @@ const VOICE = {
   maxwin: new URL('./voice/maxwin.mp3', import.meta.url).href,
   cheer: new URL('./voice/cheer.mp3', import.meta.url).href,
 };
+// David's own recorded calls (2026-11-06), an alternate host set to A/B
+// against the generated voice. Lines he didn't record fall back.
+const DAVID = {
+  welcome: new URL('./voice/d-welcome.mp3', import.meta.url).href,
+  bigwin: new URL('./voice/d-bigwin.mp3', import.meta.url).href,
+  megawin: new URL('./voice/d-megawin.mp3', import.meta.url).href,
+  epicwin: new URL('./voice/d-epicwin.mp3', import.meta.url).href,
+};
+let voiceSet = 'ai';
+export function setVoiceSet(set) { voiceSet = set === 'david' ? 'david' : 'ai'; }
+export function getVoiceSet() { return voiceSet; }
 const clips = {};
 let speaking = null;
 
@@ -323,7 +334,8 @@ function bytesOf(url) {
 }
 
 function loadClip(name) {
-  clips[name] ??= bytesOf(VOICE[name])
+  const url = name.startsWith('d:') ? DAVID[name.slice(2)] : VOICE[name];
+  clips[name] ??= bytesOf(url)
     .then((bytes) => new Promise((ok, fail) => ctx.decodeAudioData(bytes, ok, fail)))
     .catch(() => null);
   return clips[name];
@@ -333,6 +345,7 @@ function loadClip(name) {
 export function preloadVoices() {
   if (!ctx) return;
   Object.keys(VOICE).forEach(loadClip);
+  Object.keys(DAVID).forEach((k) => loadClip(`d:${k}`));
   buildApplause();
 }
 
@@ -341,7 +354,7 @@ export function preloadVoices() {
 // it finish before the next line.
 export async function say(name) {
   if (!ctx) return 0;
-  const buffer = await loadClip(name);
+  const buffer = await loadClip(voiceSet === 'david' && DAVID[name] ? `d:${name}` : name);
   if (!buffer) return 0;
   try { speaking?.stop(); } catch { /* already finished */ }
   const src = ctx.createBufferSource();

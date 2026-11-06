@@ -72,11 +72,28 @@ const coinLookup = (coins, r) => {
 
 // Spin every reel down to its final symbols, stopping left to right.
 const reelMs = (r) => 950 + r * 240;
+const TEASE_MS = 1500;
+// Anticipation, driven only by symbols that have truly landed: once two
+// scatters (or four doubloons) are already on the reels to the left, each
+// remaining reel spins longer and glows. The outcome is fixed before the
+// reels move, so the tease never changes or fakes a result.
+function teasePlan(grid) {
+  let scat = 0, coin = 0, extra = 0;
+  return grid.map((syms) => {
+    const tease = scat >= 2 || coin >= C.HOLD_AND_WIN.trigger - 2;
+    if (tease) extra += TEASE_MS;
+    scat += syms.filter((s) => s === 'SCAT').length;
+    coin += syms.filter((s) => s === 'COIN').length;
+    return { tease, extra };
+  });
+}
 function spinReels(grid, strips, coins = []) {
   clearWins();
   const cell = sizeCells();
   let scatters = 0;
-  const ticker = reelTicker(reelMs(grid.length - 1), grid.length);
+  const plan = teasePlan(grid);
+  const total = reelMs(grid.length - 1) + plan[grid.length - 1].extra;
+  const ticker = reelTicker(total, grid.length);
   return Promise.all(grid.map((finalSyms, r) => new Promise((resolve) => {
     const strip = stripOf(r);
     const fillerCount = 16 + r * 5;
@@ -90,7 +107,7 @@ function spinReels(grid, strips, coins = []) {
     const distance = (fillerCount + C.ROWS) * cell;
     // The spin is the game, so the reels always roll. With Reduce Motion on
     // they skip the blur and the overshoot bounce instead of snapping.
-    const duration = reelMs(r);
+    const duration = reelMs(r) + plan[r].extra;
     if (!reduced) reelEls[r].classList.add('blur');
     const anim = strip.animate(reduced ? [
       { transform: `translate3d(0,${-distance}px,0)`, easing: 'cubic-bezier(.3,.1,.3,1)' },
@@ -108,6 +125,14 @@ function spinReels(grid, strips, coins = []) {
       const n = finalSyms.filter((s) => s === 'SCAT').length;
       if (n) { scatters += n; sfx.scatterLand(scatters); }
       if (finalSyms.includes('COIN')) sfx.coinLand();
+      reelEls[r].classList.remove('tease');
+      reelEls[r].querySelector('.tease-glow')?.remove();
+      const next = r + 1;
+      if (plan[next]?.tease && !reduced) {
+        reelEls[next].classList.add('tease');
+        reelEls[next].insertAdjacentHTML('beforeend', '<i class="tease-glow"></i>');
+        sfx.tease((reelMs(next) + plan[next].extra - (reelMs(r) + plan[r].extra)) / 1000);
+      }
       resolve();
     };
   })));
@@ -173,10 +198,11 @@ function renderHud() {
   }
 }
 
-async function countUp(el, from, to, ms, ticking = true) {
+async function countUp(el, from, to, ms, ticking = true, abort = () => false) {
   const start = performance.now();
   let lastTick = 0;
   for (;;) {
+    if (abort()) return;
     const t = Math.min(1, (performance.now() - start) / ms);
     el.textContent = money(from + (to - from) * (1 - (1 - t) ** 3));
     if (ticking && performance.now() - lastTick > 70 && t < 1) { sfx.tick(); lastTick = performance.now(); }
@@ -254,20 +280,55 @@ async function takeover(kicker, title, amountText, ms, amountTo = null) {
 // Crowd size for a win: 0 at 1x the bet, rising to 1 at 100x.
 const winSize = (amount) => Math.max(0, Math.min(1, Math.log10(Math.max(1, amount / bet())) / 2));
 
-// Celebrate in proportion to the win, measured against the bet.
+// Celebrate in proportion to the win, measured against the bet. Like the
+// top studios' win sequences, the counter climbs through each tier it
+// passes (Big, then Mega, Epic, Legendary), re-slamming the title and
+// calling it out at every step. Tap anywhere to skip to the final total.
 async function celebrate(amount) {
   const x = amount / bet();
-  const tier = TIERS.find(([min]) => x >= min);
-  if (!tier) return;
+  const reached = TIERS.filter(([min]) => x >= min).reverse(); // lowest first
+  if (!reached.length) return;
+  const el = $('takeover'), title = $('takeoverTitle'), amt = $('takeoverAmount');
+  const card = el.querySelector('.takeover-card');
   party(true);
   fanfare();
-  say(tier[2]);
-  applause(tier[3]);
-  fx.coinShower(Math.min(160, 30 + Math.round(x * 1.5)), 2400);
   confetti.setStorm(4);
-  await takeover('YOU WIN', tier[1], '0.00', Math.min(5200, 2200 + x * 30), amount);
+  $('takeoverKicker').textContent = 'YOU WIN';
+  amt.textContent = money(0);
+  el.hidden = false;
+  let skipped = false;
+  el.onclick = () => { skipped = true; };
+  const showTier = (t) => {
+    setTiles(title, t[1]);
+    card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
+    say(t[2]);
+    applause(t[3]);
+    fx.coinShower(Math.min(160, 30 + Math.round(t[0] * 1.5)), 2400);
+  };
+  const totalMs = Math.min(9000, 2600 + reached.length * 1500);
+  duckTheme(totalMs + 1200);
+  let from = 0;
+  for (let i = 0; i < reached.length && !skipped; i++) {
+    showTier(reached[i]);
+    const to = i + 1 < reached.length ? reached[i + 1][0] * bet() : amount;
+    const seg = i + 1 < reached.length ? 1500 : Math.max(1400, totalMs - i * 1500);
+    await countUp(amt, from, to, seg, true, () => skipped);
+    from = to;
+  }
+  if (skipped) showTier(reached[reached.length - 1]);
+  amt.textContent = money(amount);
+  let closed = false;
+  el.onclick = () => { closed = true; };
+  await Promise.race([sleep(1600), until(() => closed)]);
+  el.hidden = true;
+  el.onclick = null;
   confetti.setStorm(1);
   party(false);
+}
+
+// Resolves once cond() turns true (polled each frame).
+function until(cond) {
+  return new Promise((res) => { const f = () => (cond() ? res() : requestAnimationFrame(f)); f(); });
 }
 
 // ---------- features ----------

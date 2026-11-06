@@ -127,6 +127,13 @@ export const sfx = {
     tone(NOTE(76 + n * 4), 0, 0.5, { type: 'triangle', gain: 0.25 });
     tone(NOTE(88 + n * 4), 0.04, 0.4, { gain: 0.12 });
   },
+  // Reel anticipation: a rising string swell over a heartbeat, for `sec`.
+  tease(sec = 1.5) {
+    tone(110, 0, sec, { type: 'sawtooth', gain: 0.07, slide: 2.5, attack: 0.2 });
+    tone(165, 0, sec, { type: 'triangle', gain: 0.08, slide: 2.5, attack: 0.2 });
+    for (let t = 0; t < sec - 0.2; t += 0.42) thump(t, 0.35, 70);
+    noise(0, sec, { gain: 0.05, freq: 5000, q: 0.6, type: 'highpass' });
+  },
   coinLand() {
     tone(NOTE(96), 0, 0.25, { type: 'triangle', gain: 0.18 });
     tone(NOTE(103), 0.05, 0.3, { gain: 0.12 });

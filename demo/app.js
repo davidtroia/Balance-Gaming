@@ -358,7 +358,7 @@ async function playFreeSpins(fs, scatterCount) {
   party(true);
   say('freespins');
   applause(0.6);
-  await takeover(`${scatterCount} SCATTERS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
+  await takeover(`${scatterCount} FREE SPINS SYMBOLS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
   party(false);
   document.body.classList.add('fs');
   setMood('fs');

@@ -5,7 +5,7 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { setVoiceSet, getVoiceSet, unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare, stopFanfare } from './audio.js';
+import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare, stopFanfare } from './audio.js';
 import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
@@ -601,23 +601,6 @@ function showTab(name) {
   document.querySelector('.guide-body').scrollTop = 0;
 }
 document.querySelectorAll('.guide-tabs [data-tab]').forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab)));
-// Sales-demo A/B switch between the original host and David's own calls.
-{
-  const btn = $('voiceBtn');
-  const show = () => {
-    const david = getVoiceSet() === 'david';
-    btn.textContent = `Host voice: ${david ? "David's" : 'Original'}`;
-    btn.setAttribute('aria-pressed', String(david));
-  };
-  try { setVoiceSet(localStorage.getItem('mgm-voice-v2')); } catch { /* storage blocked */ }
-  show();
-  btn.addEventListener('click', () => {
-    setVoiceSet(getVoiceSet() === 'david' ? 'ai' : 'david');
-    try { localStorage.setItem('mgm-voice-v2', getVoiceSet()); } catch { /* storage blocked */ }
-    show();
-    say(['bigwin', 'megawin', 'epicwin'][Math.floor(Math.random() * 3)]);
-  });
-}
 document.querySelectorAll('[data-show]').forEach((b) => b.addEventListener('click', () => spin(seededRng(SHOWCASE[b.dataset.show]))));
 $('startBtn').addEventListener('click', () => {
   unlock();

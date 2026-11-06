@@ -453,7 +453,7 @@ dialog h2.tiles { --tw: clamp(20px, 6.4vw, 30px); margin: 0; }
   .world *, .takeover .rays { animation: none !important; transition: none !important; }
 }
 /* Phone: the cabinet is zoomed to fit the screen (see fitPhone in app.js). */
-body.fitted { overflow-x: hidden; }
+html:has(body.fitted), body.fitted { overflow-x: clip; }
 body.fitted .cabinet { margin: 0 auto; max-width: none; box-sizing: border-box; }
 /* Phone held sideways: shrink the intro so the start button fits without scrolling. */
 @media (max-height: 500px) {

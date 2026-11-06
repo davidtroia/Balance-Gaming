@@ -213,24 +213,28 @@ async function countUp(el, from, to, ms, ticking = true, abort = () => false) {
 
 // Spell words in New Orleans sidewalk street-name tiles: one letter per
 // 4 by 6 inch encaustic tile, set in grout inside a blue border band, like
-// the corner inlays (PRYTANIA, ESPLANADE). "|" starts a new row and a space
+// splits words with a gap of blue band. Each tile sits a hair off true, as hand-laid tile does.
 // is a blank field tile. Each tile sits a hair off true, as hand-laid tile does.
 const esc = (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch] || ch);
 function setTiles(el, text) {
   const label = text.replace(/\|/g, ' ').replace(/\s+/g, ' ').trim();
   el.setAttribute('aria-label', label);
-  el.style.setProperty('--n', Math.max(...text.split('|').map((r) => r.length)));
+  el.style.setProperty('--n', Math.max(...text.split('|').map((r) => r.trim().length)));
   let k = 0;
+  // Every letter is a real tile; spaces are gaps of blue band between
+  // words. Wear is fixed per letter position so the logo always looks
+  // the same: a few hairline cracks and the odd chipped corner.
   const tile = (ch) => {
     k++;
     const wob = (((k * 37 + ch.charCodeAt(0) * 11) % 9) - 4) * 0.22;
     const wear = ((k * 53) % 7) / 7;
-    return ch === ' '
-      ? `<i class="t blank" style="--r:${wob}deg;--w:${wear}"></i>`
-      : `<i class="t" style="--r:${wob}deg;--w:${wear}"><b>${esc(ch)}</b></i>`;
+    const crack = ['', 'c1', '', 'c2', '', '', 'c3'][(k * 5) % 7];
+    const chip = k % 6 === 2 ? 'chip-tr' : k % 7 === 5 ? 'chip-bl' : '';
+    return `<i class="t ${crack} ${chip}" style="--r:${wob}deg;--w:${wear}"><b>${esc(ch)}</b></i>`;
   };
+  const words = (row) => row.trim().split(/\s+/).filter(Boolean);
   el.innerHTML = `<span class="tile-field" aria-hidden="true">${text.split('|').map((row) =>
-    `<span class="tile-row">${row.split(/(?<= )/).map((w) => `<span class="tile-word">${[...w].map(tile).join('')}</span>`).join('')}</span>`).join('')}</span>`;
+    `<span class="tile-row">${words(row).map((w) => `<span class="tile-word">${[...w].map(tile).join('')}</span>`).join('')}</span>`).join('')}</span>`;
 }
 // David's button art: spin ring (normal, pressed, greyed) and BET − / BET +.
 const UI_ART = {
@@ -298,24 +302,31 @@ async function celebrate(amount) {
   el.hidden = false;
   let skipped = false;
   el.onclick = () => { skipped = true; };
+  // The host calls every tier the counter passes, and each step lasts at
+  // least as long as its call, so "Mega Win!" always finishes before
+  // "Epic Win!" starts. A tap skips straight to the final tier's call.
+  const top = reached[reached.length - 1];
+  let shownTop = false;
   const showTier = (t) => {
     setTiles(title, t[1]);
     card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
-    say(t[2]);
+    if (t === top) shownTop = true;
     applause(t[3]);
     fx.coinShower(Math.min(160, 30 + Math.round(t[0] * 1.5)), 2400);
+    return say(t[2]);
   };
-  const totalMs = Math.min(9000, 2600 + reached.length * 1500);
-  duckTheme(totalMs + 1200);
+  const STEP = 900;
+  duckTheme(2600 + reached.length * 2400);
   let from = 0;
   for (let i = 0; i < reached.length && !skipped; i++) {
-    showTier(reached[i]);
-    const to = i + 1 < reached.length ? reached[i + 1][0] * bet() : amount;
-    const seg = i + 1 < reached.length ? 1500 : Math.max(1400, totalMs - i * 1500);
+    const voiceMs = await showTier(reached[i]);
+    const last = i + 1 === reached.length;
+    const to = last ? amount : reached[i + 1][0] * bet();
+    const seg = last ? Math.max(1400, 2600 - i * 300) : Math.max(STEP, voiceMs + 150);
     await countUp(amt, from, to, seg, true, () => skipped);
     from = to;
   }
-  if (skipped) showTier(reached[reached.length - 1]);
+  if (!shownTop) showTier(top);
   amt.textContent = money(amount);
   let closed = false;
   el.onclick = () => { closed = true; };
@@ -347,7 +358,7 @@ async function playFreeSpins(fs, scatterCount) {
   party(true);
   say('freespins');
   applause(0.6);
-  await takeover(`${scatterCount} SCATTERS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
+  await takeover(`${scatterCount} FREE SPINS SYMBOLS`, 'FREE SPINS', `${fs.awarded} SPINS`, 2400);
   party(false);
   document.body.classList.add('fs');
   setMood('fs');

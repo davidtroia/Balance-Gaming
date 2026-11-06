@@ -76,6 +76,12 @@ body.hw .street { filter: brightness(.65); }
 .marquee { position: relative; justify-self: center; display: grid; justify-items: center; margin-top: 18px; }
 .crest { width: 44px; height: 44px; fill: url(#gFrame); filter: drop-shadow(0 0 10px rgba(240, 194, 74, .7)) drop-shadow(0 3px 2px #000); }
 .marquee .crest { position: absolute; top: -26px; z-index: 2; }
+/* New Orleans skyline silhouette rising behind the street-tile logo:
+   the bridge, the CBD towers, the Superdome and the Cathedral. */
+.marquee .skyline { position: absolute; z-index: 0; left: 50%; bottom: 8%; translate: -50% 0; width: clamp(320px, 74vw, 820px); height: auto; aspect-ratio: 5 / 1; pointer-events: none;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  filter: drop-shadow(0 0 10px rgba(150, 70, 220, .55)); }
+.marquee .logo { position: relative; z-index: 1; }
 .logo { margin: 0; }
 .marquee .logo { --tw: clamp(20px, min(3.5vw, 3.3svh), 40px); }
 
@@ -93,22 +99,34 @@ body.hw .street { filter: brightness(.65); }
     linear-gradient(180deg, #2b58bb, var(--cobalt) 45%, var(--cobalt-lo));
   box-shadow: 0 0 0 var(--g) var(--grout), 0 0 0 calc(var(--g) + 2px) rgba(0, 0, 0, .55), 0 10px 26px rgba(0, 0, 0, .7), 0 0 34px rgba(240, 194, 74, .3);
 }
-.tile-field { display: grid; gap: var(--g); padding: var(--g); background: var(--grout); border-radius: 2px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5); }
-.tile-row { display: flex; justify-content: center; gap: var(--g); }
+.tile-field { display: grid; gap: var(--g); }
+.tile-word { padding: var(--g); background: var(--grout); border-radius: 2px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5), 0 0 0 1px rgba(0, 0, 0, .35); }
+.tile-row { display: flex; justify-content: center; gap: calc(var(--tw) * .45); }
 .tile-word { display: flex; gap: var(--g); }
 .t {
   position: relative; display: grid; place-items: center; width: var(--tw); height: calc(var(--tw) * 1.5);
-  rotate: var(--r, 0deg); border-radius: 1.5px;
+  rotate: var(--r, 0deg); border-radius: 1.5px; overflow: hidden;
   background:
-    radial-gradient(ellipse 60% 40% at 30% 80%, rgba(120, 104, 70, calc(var(--w) * .16)), transparent 70%),
-    linear-gradient(170deg, #fffdf6, var(--tile) 45%, var(--tile-lo));
-  box-shadow: inset 0 1px 0 #fff, inset 0 -2px 0 rgba(0, 0, 0, .14), inset 1px 0 0 rgba(255, 255, 255, .6), 0 1px 1px rgba(0, 0, 0, .35);
+    radial-gradient(ellipse 60% 40% at 30% 80%, rgba(110, 92, 58, calc(.12 + var(--w) * .22)), transparent 70%),
+    radial-gradient(ellipse 120% 35% at 50% 104%, rgba(70, 58, 36, .38), transparent 70%),
+    radial-gradient(ellipse 30% 90% at -4% 50%, rgba(70, 58, 36, .22), transparent 70%),
+    linear-gradient(170deg, #f6f0de, #e9e1cb 45%, #cfc4a8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 -2px 0 rgba(0, 0, 0, .2), inset 1px 0 0 rgba(255, 255, 255, .4), 0 1px 1px rgba(0, 0, 0, .35);
 }
-.t:not(.blank)::before { content: ""; position: absolute; inset: 8% 9%; border: max(1px, calc(var(--tw) * .035)) solid var(--pin); border-radius: 1px; opacity: .85; }
+/* Weathering: grime grain on every tile, hairline cracks on some, and a
+   chipped corner here and there showing the grout behind. */
+.t::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 60%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.9%27 numOctaves=%273%27 seed=%274%27/%3E%3CfeColorMatrix values=%270 0 0 0 .33  0 0 0 0 .28  0 0 0 0 .2  0 0 0 -1.6 .95%27/%3E%3C/filter%3E%3Crect width=%2740%27 height=%2760%27 filter=%27url(%23n)%27/%3E%3C/svg%3E") center / cover; mix-blend-mode: multiply; opacity: .3; }
+.t.c1::after { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 60%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M0 14 L7 17 L11 15 L17 21 L22 20 L27 27 L26 31 M17 21 L16 28 L19 33%27 fill=%27none%27 stroke=%27%23fff%27 stroke-opacity=%27.7%27 stroke-width=%271.1%27 transform=%27translate(.5 .6)%27/%3E%3Cpath d=%27M0 14 L7 17 L11 15 L17 21 L22 20 L27 27 L26 31 M17 21 L16 28 L19 33%27 fill=%27none%27 stroke=%27%233a3328%27 stroke-opacity=%27.85%27 stroke-width=%27.75%27 stroke-linejoin=%27bevel%27/%3E%3C/svg%3E") center / 100% 100%, url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 60%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.9%27 numOctaves=%273%27 seed=%274%27/%3E%3CfeColorMatrix values=%270 0 0 0 .33  0 0 0 0 .28  0 0 0 0 .2  0 0 0 -1.6 .95%27/%3E%3C/filter%3E%3Crect width=%2740%27 height=%2760%27 filter=%27url(%23n)%27/%3E%3C/svg%3E") center / cover; opacity: .75; }
+.t.c2::after { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 60%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M40 38 L33 36 L29 41 L24 40 L19 47 L20 53 L15 60 M29 41 L31 48%27 fill=%27none%27 stroke=%27%23fff%27 stroke-opacity=%27.7%27 stroke-width=%271.1%27 transform=%27translate(.5 .6)%27/%3E%3Cpath d=%27M40 38 L33 36 L29 41 L24 40 L19 47 L20 53 L15 60 M29 41 L31 48%27 fill=%27none%27 stroke=%27%233a3328%27 stroke-opacity=%27.85%27 stroke-width=%27.75%27 stroke-linejoin=%27bevel%27/%3E%3C/svg%3E") center / 100% 100%, url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 60%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.9%27 numOctaves=%273%27 seed=%274%27/%3E%3CfeColorMatrix values=%270 0 0 0 .33  0 0 0 0 .28  0 0 0 0 .2  0 0 0 -1.6 .95%27/%3E%3C/filter%3E%3Crect width=%2740%27 height=%2760%27 filter=%27url(%23n)%27/%3E%3C/svg%3E") center / cover; opacity: .75; }
+.t.c3::after { background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 60%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M12 0 L14 6 L12 11 L17 16 L16 22 M14 6 L20 8 L23 5%27 fill=%27none%27 stroke=%27%23fff%27 stroke-opacity=%27.7%27 stroke-width=%271.1%27 transform=%27translate(.5 .6)%27/%3E%3Cpath d=%27M12 0 L14 6 L12 11 L17 16 L16 22 M14 6 L20 8 L23 5%27 fill=%27none%27 stroke=%27%233a3328%27 stroke-opacity=%27.85%27 stroke-width=%27.75%27 stroke-linejoin=%27bevel%27/%3E%3C/svg%3E") center / 100% 100%, url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 60%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%27.9%27 numOctaves=%273%27 seed=%274%27/%3E%3CfeColorMatrix values=%270 0 0 0 .33  0 0 0 0 .28  0 0 0 0 .2  0 0 0 -1.6 .95%27/%3E%3C/filter%3E%3Crect width=%2740%27 height=%2760%27 filter=%27url(%23n)%27/%3E%3C/svg%3E") center / cover; opacity: .75; }
+.t.chip-tr { clip-path: polygon(0 0, 78% 0, 86% 5%, 100% 9%, 100% 100%, 0 100%); }
+.t.chip-bl { clip-path: polygon(0 0, 100% 0, 100% 100%, 20% 100%, 12% 95%, 0 91%); }
+.t::before { content: ""; position: absolute; inset: 8% 9%; border: max(1px, calc(var(--tw) * .035)) solid var(--pin); border-radius: 1px; opacity: .85; }
 .t b {
   position: relative; font: 400 calc(var(--tw) * .9) / 1 'MayhemStreetWeathered', var(--show); color: var(--cobalt);
   text-shadow: 0 0 .5px var(--cobalt), 0 1px 0 rgba(255, 255, 255, .5);
-  opacity: calc(1 - var(--w) * .12);
+  opacity: calc(.96 - var(--w) * .16);
 }
 
 .stage { display: grid; grid-template-columns: minmax(170px, 21%) 1fr; gap: 16px; align-items: center; }
@@ -260,11 +278,30 @@ body.high-limit .machine::after {
 
 /* ---------- controls ---------- */
 .controls {
+  position: relative; isolation: isolate;
   display: grid; grid-template-columns: 1fr 1fr auto auto auto; gap: 12px; align-items: center;
   padding: 12px 16px; border-radius: 18px;
-  background: linear-gradient(180deg, rgba(20, 36, 86, .97), rgba(6, 11, 32, .98));
-  border: 1.5px solid rgba(240, 194, 74, .6); box-shadow: 0 14px 34px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .1);
+  /* Lacquered navy cabinet panel: film grain, a gold crawfish and
+     fleur-de-lis damask, a soft top sheen and a darker lower edge. */
+  background:
+    radial-gradient(ellipse 70% 60% at 50% -10%, rgba(120, 150, 255, .22), transparent 70%),
+    radial-gradient(ellipse 120% 80% at 50% 130%, rgba(0, 0, 0, .55), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='132' viewBox='0 0 132 132'%3E%3Cg fill='%23f0c24a' stroke='%23f0c24a' fill-opacity='.05' stroke-opacity='.13' stroke-width='1.6'%3E%3Cg transform='translate(14 6) rotate(-18 19 32) scale(.32)'%3E%3Cg stroke-linejoin='round' stroke-linecap='round'%3E %3Cpath d='M55 52 C40 30 22 18 8 4 M65 52 C80 30 98 18 112 4' fill='none' stroke-width='2'/%3E %3Cpath d='M50 66 C38 62 30 52 28 40 L33 38 C36 49 43 56 52 60 Z M70 66 C82 62 90 52 92 40 L87 38 C84 49 77 56 68 60 Z'/%3E %3Cpath d='M30 42 C18 36 14 20 20 8 C24 18 28 22 32 24 C30 14 32 6 38 2 C38 14 40 26 36 38 Z M90 42 C102 36 106 20 100 8 C96 18 92 22 88 24 C90 14 88 6 82 2 C82 14 80 26 84 38 Z'/%3E %3Cpath d='M50 78 L36 74 L30 82 M50 86 L34 86 L28 96 M51 94 L36 98 L32 108 M70 78 L84 74 L90 82 M70 86 L86 86 L92 96 M69 94 L84 98 L88 108' fill='none' stroke-width='2.4'/%3E %3Cpath d='M60 46 C52 48 48 56 48 66 L48 98 C48 104 54 108 60 108 C66 108 72 104 72 98 L72 66 C72 56 68 48 60 46 Z M60 50 L56 44 L60 38 L64 44 Z'/%3E %3Cpath d='M49 108 L71 108 L70 120 L50 120 Z M50 120 L70 120 L68 132 L52 132 Z M52 132 L68 132 L66 143 L54 143 Z M54 143 L66 143 L65 153 L55 153 Z M55 153 L65 153 L64 162 L56 162 Z'/%3E %3Cpath d='M60 162 L46 186 C52 190 56 190 60 186 C64 190 68 190 74 186 Z M57 164 L38 178 C40 184 44 186 48 184 Z M63 164 L82 178 C80 184 76 186 72 184 Z'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(80 70) rotate(162 19 32) scale(.32)'%3E%3Cg stroke-linejoin='round' stroke-linecap='round'%3E %3Cpath d='M55 52 C40 30 22 18 8 4 M65 52 C80 30 98 18 112 4' fill='none' stroke-width='2'/%3E %3Cpath d='M50 66 C38 62 30 52 28 40 L33 38 C36 49 43 56 52 60 Z M70 66 C82 62 90 52 92 40 L87 38 C84 49 77 56 68 60 Z'/%3E %3Cpath d='M30 42 C18 36 14 20 20 8 C24 18 28 22 32 24 C30 14 32 6 38 2 C38 14 40 26 36 38 Z M90 42 C102 36 106 20 100 8 C96 18 92 22 88 24 C90 14 88 6 82 2 C82 14 80 26 84 38 Z'/%3E %3Cpath d='M50 78 L36 74 L30 82 M50 86 L34 86 L28 96 M51 94 L36 98 L32 108 M70 78 L84 74 L90 82 M70 86 L86 86 L92 96 M69 94 L84 98 L88 108' fill='none' stroke-width='2.4'/%3E %3Cpath d='M60 46 C52 48 48 56 48 66 L48 98 C48 104 54 108 60 108 C66 108 72 104 72 98 L72 66 C72 56 68 48 60 46 Z M60 50 L56 44 L60 38 L64 44 Z'/%3E %3Cpath d='M49 108 L71 108 L70 120 L50 120 Z M50 120 L70 120 L68 132 L52 132 Z M52 132 L68 132 L66 143 L54 143 Z M54 143 L66 143 L65 153 L55 153 Z M55 153 L65 153 L64 162 L56 162 Z'/%3E %3Cpath d='M60 162 L46 186 C52 190 56 190 60 186 C64 190 68 190 74 186 Z M57 164 L38 178 C40 184 44 186 48 184 Z M63 164 L82 178 C80 184 76 186 72 184 Z'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(100 30)'%3E%3Cpath d='M0 -14 C5 -8 5 -2 0 4 C-5 -2 -5 -8 0 -14 Z M-2 2 C-8 -6 -15 -2 -12 4 C-10 8 -5 6 -3 4 M2 2 C8 -6 15 -2 12 4 C10 8 5 6 3 4 M-6 6 L6 6 M0 6 L0 12' fill='none' stroke-width='1.6'/%3E%3C/g%3E%3Cg transform='translate(34 98)'%3E%3Cpath d='M0 -14 C5 -8 5 -2 0 4 C-5 -2 -5 -8 0 -14 Z M-2 2 C-8 -6 -15 -2 -12 4 C-10 8 -5 6 -3 4 M2 2 C8 -6 15 -2 12 4 C10 8 5 6 3 4 M-6 6 L6 6 M0 6 L0 12' fill='none' stroke-width='1.6'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 0 0 / 132px 132px,
+    linear-gradient(180deg, #172a66, #0b1640 55%, #050a22);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  box-shadow: 0 0 0 2px #8a5a00, 0 0 0 3.5px #f0c24a, 0 0 0 5px #5a3a00, 0 14px 34px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .14), inset 0 0 22px rgba(0, 0, 0, .6);
 }
+/* Two big engraved crawfish facing in from the ends of the panel. */
+.controls::before, .controls::after {
+  content: ""; position: absolute; z-index: -1; top: 50%; width: 64px; height: 108px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'%3E%3Cg fill='%23f0c24a' stroke='%23ffe9a8' fill-opacity='.14' stroke-opacity='.4' stroke-width='1.4'%3E%3Cg stroke-linejoin='round' stroke-linecap='round'%3E %3Cpath d='M55 52 C40 30 22 18 8 4 M65 52 C80 30 98 18 112 4' fill='none' stroke-width='2'/%3E %3Cpath d='M50 66 C38 62 30 52 28 40 L33 38 C36 49 43 56 52 60 Z M70 66 C82 62 90 52 92 40 L87 38 C84 49 77 56 68 60 Z'/%3E %3Cpath d='M30 42 C18 36 14 20 20 8 C24 18 28 22 32 24 C30 14 32 6 38 2 C38 14 40 26 36 38 Z M90 42 C102 36 106 20 100 8 C96 18 92 22 88 24 C90 14 88 6 82 2 C82 14 80 26 84 38 Z'/%3E %3Cpath d='M50 78 L36 74 L30 82 M50 86 L34 86 L28 96 M51 94 L36 98 L32 108 M70 78 L84 74 L90 82 M70 86 L86 86 L92 96 M69 94 L84 98 L88 108' fill='none' stroke-width='2.4'/%3E %3Cpath d='M60 46 C52 48 48 56 48 66 L48 98 C48 104 54 108 60 108 C66 108 72 104 72 98 L72 66 C72 56 68 48 60 46 Z M60 50 L56 44 L60 38 L64 44 Z'/%3E %3Cpath d='M49 108 L71 108 L70 120 L50 120 Z M50 120 L70 120 L68 132 L52 132 Z M52 132 L68 132 L66 143 L54 143 Z M54 143 L66 143 L65 153 L55 153 Z M55 153 L65 153 L64 162 L56 162 Z'/%3E %3Cpath d='M60 162 L46 186 C52 190 56 190 60 186 C64 190 68 190 74 186 Z M57 164 L38 178 C40 184 44 186 48 184 Z M63 164 L82 178 C80 184 76 186 72 184 Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+.controls::before { left: 6px; translate: 0 -50%; rotate: 90deg; }
+.controls::after { right: 6px; translate: 0 -50%; rotate: -90deg; }
+
+
 .meter { text-align: center; }
 .meter label { display: block; font: 700 semi-condensed 10px var(--ui); letter-spacing: .22em; opacity: .75; }
 .meter output { font: 400 clamp(17px, 2.3vw, 25px) / 1.15 var(--show); color: var(--gold); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
@@ -342,7 +379,7 @@ body.high-limit .machine::after {
 .intro-card { max-width: 580px; text-align: center; display: grid; gap: 14px; justify-items: center; animation: slam .8s cubic-bezier(.2, 1.4, .4, 1) both; }
 .intro-card .crest { width: 54px; height: 54px; }
 .intro-kicker::before, .intro-kicker::after { content: " \269C "; color: var(--gold); }
-.intro-kicker { margin: 0; font: 800 12px var(--ui); letter-spacing: .3em; text-transform: uppercase; color: var(--gold-hi); opacity: .9; }
+.intro-kicker { margin: 0; font: 800 12px var(--ui); letter-spacing: .3em; text-transform: uppercase; color: var(--gold-hi); opacity: .75; }
 .intro .logo { --tw: clamp(24px, calc((100vw - 70px) / 11.4), 48px); }
 .story { margin: 0; font-size: 16px; line-height: 1.6; max-width: 46ch; color: #f4e8ff; text-shadow: 0 1px 2px #000; text-wrap: pretty; }
 .start {
@@ -364,7 +401,7 @@ dialog.guide {
 dialog.guide[open] { display: flex; }
 dialog::backdrop { background: rgba(8, 1, 14, .75); }
 .guide-head { flex-shrink: 0; position: relative; display: grid; justify-items: center; gap: 10px; padding: 18px 16px 12px; }
-.guide-head::before { content: ""; position: absolute; left: 14px; right: 14px; top: 0; height: 12px; background: var(--beads); opacity: .9; }
+.guide-head::before { content: ""; position: absolute; left: 14px; right: 14px; top: 0; height: 12px; background: var(--beads); opacity: .75; }
 .guide-back { position: absolute; left: 12px; top: 18px; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid rgba(240, 194, 74, .6); background: rgba(0, 0, 0, .3); color: var(--gold-hi); font: 400 26px/1 var(--ui); cursor: pointer; }
 .guide-badge { position: relative; width: clamp(58px, 9svh, 84px); aspect-ratio: 1; margin-top: 6px; }
 .guide-badge img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px var(--gold), 0 0 0 6px #2a0b45, 0 0 24px rgba(240, 194, 74, .5); }
@@ -426,7 +463,7 @@ dialog h2.tiles { --tw: clamp(20px, 6.4vw, 30px); margin: 0; }
 @keyframes spinBurst { to { transform: rotate(360deg); } }
 @keyframes slam { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes breathe { 50% { transform: scale(1.05); } }
-@keyframes flicker { 50% { opacity: .75; transform: scale(.96); } 52% { opacity: .9; } }
+@keyframes flicker { 50% { opacity: .75; transform: scale(.96); } 52% { opacity: .75; } }
 @keyframes twinkle { 50% { opacity: .3; } }
 
 /* ---------- smaller screens ---------- */
@@ -469,3 +506,4 @@ body.fitted .cabinet { margin: 0 auto; max-width: none; box-sizing: border-box; 
   .intro .logo { --tw: clamp(18px, 5.2vh, 30px); }
   .intro-card p:not(.intro-kicker):not(.intro-note) { font-size: 13px; margin: 0; }
 }
+body.fitted .marquee .skyline { width: 430px; bottom: 0; }

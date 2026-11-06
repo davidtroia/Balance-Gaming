@@ -555,11 +555,14 @@ requestAnimationFrame(() => { sizeCells(); placeBulbs(); });
 const PHONE_W = 430;
 function fitPhone() {
   const cab = $('cabinet');
-  if (innerWidth > 700) { cab.style.zoom = ''; cab.style.width = ''; document.body.classList.remove('fitted'); return; }
+  const phone = innerWidth <= 700 || (matchMedia('(pointer: coarse)').matches && innerHeight <= 500);
+  if (!phone) { cab.style.zoom = ''; cab.style.width = ''; document.body.classList.remove('fitted'); return; }
   document.body.classList.add('fitted');
-  cab.style.zoom = 1;
+  // Never lay it out wider than the screen, even for a moment: a phone browser
+  // would widen its viewport to fit and the measurement would be off.
+  cab.style.zoom = ((innerWidth - 8) / PHONE_W).toFixed(4);
   cab.style.width = `${PHONE_W}px`;
-  const z = Math.min(innerWidth / PHONE_W, innerHeight / cab.scrollHeight);
+  const z = Math.min((innerWidth - 8) / PHONE_W, innerHeight / cab.scrollHeight);
   cab.style.zoom = z.toFixed(4);
   sizeCells(); placeBulbs();
 }

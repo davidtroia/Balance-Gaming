@@ -337,10 +337,12 @@ export function preloadVoices() {
 }
 
 // The host announces one line; a new line cuts off the one before it.
+// Resolves with the line's length in ms (0 when silent) so callers can let
+// it finish before the next line.
 export async function say(name) {
-  if (!ctx) return;
+  if (!ctx) return 0;
   const buffer = await loadClip(name);
-  if (!buffer) return;
+  if (!buffer) return 0;
   try { speaking?.stop(); } catch { /* already finished */ }
   const src = ctx.createBufferSource();
   const g = ctx.createGain();
@@ -350,6 +352,7 @@ export async function say(name) {
   src.start();
   speaking = src;
   duckTheme(buffer.duration * 1000 + 400);
+  return buffer.duration * 1000;
 }
 
 // Applause is rendered offline once, from hundreds of tiny noise-burst claps

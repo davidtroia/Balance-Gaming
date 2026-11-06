@@ -302,24 +302,31 @@ async function celebrate(amount) {
   el.hidden = false;
   let skipped = false;
   el.onclick = () => { skipped = true; };
+  // The host calls every tier the counter passes, and each step lasts at
+  // least as long as its call, so "Mega Win!" always finishes before
+  // "Epic Win!" starts. A tap skips straight to the final tier's call.
+  const top = reached[reached.length - 1];
+  let shownTop = false;
   const showTier = (t) => {
     setTiles(title, t[1]);
     card.style.animation = 'none'; void card.offsetWidth; card.style.animation = '';
-    say(t[2]);
+    if (t === top) shownTop = true;
     applause(t[3]);
     fx.coinShower(Math.min(160, 30 + Math.round(t[0] * 1.5)), 2400);
+    return say(t[2]);
   };
-  const totalMs = Math.min(9000, 2600 + reached.length * 1500);
-  duckTheme(totalMs + 1200);
+  const STEP = 900;
+  duckTheme(2600 + reached.length * 2400);
   let from = 0;
   for (let i = 0; i < reached.length && !skipped; i++) {
-    showTier(reached[i]);
-    const to = i + 1 < reached.length ? reached[i + 1][0] * bet() : amount;
-    const seg = i + 1 < reached.length ? 1500 : Math.max(1400, totalMs - i * 1500);
+    const voiceMs = await showTier(reached[i]);
+    const last = i + 1 === reached.length;
+    const to = last ? amount : reached[i + 1][0] * bet();
+    const seg = last ? Math.max(1400, 2600 - i * 300) : Math.max(STEP, voiceMs + 150);
     await countUp(amt, from, to, seg, true, () => skipped);
     from = to;
   }
-  if (skipped) showTier(reached[reached.length - 1]);
+  if (!shownTop) showTier(top);
   amt.textContent = money(amount);
   let closed = false;
   el.onclick = () => { closed = true; };

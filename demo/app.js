@@ -246,7 +246,17 @@ const UI_ART = {
   betPlus: new URL('./img/btn-bet-plus.webp', import.meta.url).href,
   betPlusPressed: new URL('./img/btn-bet-plus-pressed.webp', import.meta.url).href,
   icon: new URL('./img/icon.webp', import.meta.url).href,
+  studio: new URL('./img/balance-digital.webp', import.meta.url).href,
+  crestTop: new URL('./img/frame-crest-top.webp', import.meta.url).href,
+  crestBottom: new URL('./img/frame-crest-bottom.webp', import.meta.url).href,
 };
+// Painted backdrop and reel frame, handed to the stylesheet as variables.
+{
+  const rs = document.documentElement.style;
+  rs.setProperty('--street-wide', `url("${new URL('./img/street-wide.webp', import.meta.url).href}")`);
+  rs.setProperty('--street-tall', `url("${new URL('./img/street-tall.webp', import.meta.url).href}")`);
+  rs.setProperty('--frame-art', `url("${new URL('./img/frame.webp', import.meta.url).href}")`);
+}
 document.querySelectorAll('[data-art]').forEach((img) => { img.src = UI_ART[img.dataset.art]; img.draggable = false; });
 
 document.querySelectorAll('[data-tiles]').forEach((el) => setTiles(el, el.dataset.tiles));

@@ -323,7 +323,8 @@ function bytesOf(url) {
 }
 
 function loadClip(name) {
-  clips[name] ??= bytesOf(VOICE[name])
+  const url = VOICE[name];
+  clips[name] ??= bytesOf(url)
     .then((bytes) => new Promise((ok, fail) => ctx.decodeAudioData(bytes, ok, fail)))
     .catch(() => null);
   return clips[name];

@@ -25,6 +25,8 @@ npm run sim -- 50000000 2026   # rounds, seed
 npm run demo           # free-play demo at http://localhost:8080/demo/
 ```
 
+To share the demo with a partner as a password-protected link that plays on a phone, see [docs/partner-demo-hosting.md](docs/partner-demo-hosting.md) (`npm run build:demo`, `npm run deploy:demo`).
+
 Add `?seed=123` to the demo URL to replay a fixed sequence of rounds, which is useful for QA and for recording feature videos.
 
 ### Layout
@@ -36,6 +38,7 @@ engine/rng.js      seeded RNG for simulation, crypto RNG for the demo
 sim/simulate.js    Monte Carlo simulator and report
 sim/tune.js        quick what-if runs with config overrides
 demo/              free-play browser demo that animates engine results
+deploy/cloudflare/ password gate and config for the partner demo link
 docs/par-sheet.md  math summary for labs and operators
 ```
 

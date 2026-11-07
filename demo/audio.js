@@ -224,9 +224,10 @@ export async function startTheme() {
   bus.gain.value = MOODS[mood].gain;
   bus.connect(filter).connect(master);
   music = { filter, bus };
-  loadTrack('fs');
-  loadTrack('hw');
+  // Base theme first so it starts as soon as possible on a phone connection;
+  // the feature tracks download after it, before anyone can trigger a feature.
   playTrack('base');
+  loadTrack('base').finally(() => { loadTrack('fs'); loadTrack('hw'); });
 }
 
 // Fade out whatever is playing and start `name` from the top.

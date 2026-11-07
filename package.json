@@ -5,6 +5,8 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "sim": "node sim/simulate.js",
-    "demo": "node scripts/serve.js"
+    "demo": "node scripts/serve.js",
+    "build:demo": "node scripts/build-demo-site.js",
+    "deploy:demo": "npm run build:demo && cd deploy/cloudflare && npx wrangler@4 pages deploy"
   }
 }

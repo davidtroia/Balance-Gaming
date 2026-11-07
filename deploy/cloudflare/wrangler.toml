@@ -1,0 +1,6 @@
+# Cloudflare Pages project for the password-protected partner demo.
+# Build first with `npm run build:demo`, then deploy from this folder:
+#   npx wrangler pages deploy
+name = "mardi-gras-mayhem-demo"
+pages_build_output_dir = "public"
+compatibility_date = "2026-10-01"

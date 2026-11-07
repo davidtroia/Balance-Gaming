@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const port = Number(process.argv[2] || 8080);
-const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg' };
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.json': 'application/json' };
 
 http.createServer((req, res) => {
   const url = decodeURIComponent(req.url.split('?')[0]);
@@ -23,4 +23,4 @@ http.createServer((req, res) => {
   }
   res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream' });
   fs.createReadStream(file).pipe(res);
-}).listen(port, () => console.log(`Golden Ascent demo: http://localhost:${port}/demo/`));
+}).listen(port, () => console.log(`Mardi Gras Mayhem demo: http://localhost:${port}/demo/`));

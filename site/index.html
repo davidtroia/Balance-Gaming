@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Balance Digital</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Balance Digital is a New Orleans casino game studio building original slots for licensed online casinos. First title: Mardi Gras Mayhem.">
+<meta property="og:title" content="Balance Digital">
+<meta property="og:description" content="Original casino games from New Orleans. First title: Mardi Gras Mayhem, a 5x4, 1,024-ways video slot.">
+<meta property="og:image" content="assets/og-image.jpg">
+<meta name="theme-color" content="#110c16">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23110c16'/%3E%3Ccircle cx='32' cy='34' r='16' fill='none' stroke='%23ece2cf' stroke-width='8'/%3E%3Crect x='16' y='10' width='8' height='24' fill='%23ece2cf'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+@font-face { font-family: "Mayhem Street"; src: url(assets/fonts/MayhemStreet-Weathered.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Mayhem Street Clean"; src: url(assets/fonts/MayhemStreet-Clean.woff2) format("woff2"); font-display: swap; }
+
+/* Layout: a late-night lounge program. Left-aligned editorial column, one bold moment (the street-tile game title), numbers set like a par sheet. Deliberately single dark theme. */
+:root {
+  --ink: #110c16;
+  --ink-raised: #1a1320;
+  --ink-sunk: #0b080e;
+  --ivory: #ece2cf;
+  --muted: #a89fb0;
+  --line: rgba(236, 226, 207, 0.13);
+  --gold: #d8b36a;
+  --gold-soft: rgba(216, 179, 106, 0.14);
+  --purple: #7a4bb3;
+  --green: #4fa37a;
+  --tile: #f2ece0;
+  --tile-blue: #1f4fa8;
+
+  --display: "Instrument Serif", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --body: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --step--1: 0.8125rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.9rem;
+  --step-3: clamp(2.3rem, 4.5vw, 3.4rem);
+  --step-4: clamp(2.9rem, 7vw, 5.6rem);
+
+  --wrap: 72rem;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--ivory);
+  font: 400 var(--step-0)/1.6 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 4px; }
+
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 720px) {
+  .wrap { padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); }
+}
+
+.eyebrow {
+  font: 500 var(--step--1)/1.2 var(--mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0;
+}
+h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: var(--step-4); line-height: 0.98; }
+h2 { font-size: var(--step-3); line-height: 1.05; }
+h3 { font-size: var(--step-1); font-family: var(--body); font-weight: 600; letter-spacing: 0; }
+em { font-style: italic; color: var(--gold); }
+p { margin: 0; max-width: 62ch; }
+.lede { font-size: var(--step-1); line-height: 1.5; color: var(--ivory); }
+.muted { color: var(--muted); }
+
+/* Header */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink); }
+.site-head {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--ink) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.site-head .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding-block: 0.9rem; }
+.brand img { height: 3.1rem; width: auto; }
+.nav { display: flex; gap: 1.6rem; font-size: 0.95rem; }
+.nav a { text-decoration: none; color: var(--muted); }
+.nav a:hover { color: var(--ivory); }
+.nav .cta-link { color: var(--ink); background: var(--gold); padding: 0.45rem 0.95rem; border-radius: 999px; font-weight: 600; }
+.nav .cta-link:hover { color: var(--ink); background: #e6c47f; }
+@media (max-width: 760px) { .nav a:not(.cta-link) { display: none; } }
+
+/* Hero */
+.hero { padding-block: clamp(3rem, 8vw, 6.5rem) clamp(3rem, 6vw, 5rem); }
+.hero .wrap { display: grid; gap: clamp(2rem, 5vw, 4rem); grid-template-columns: minmax(0, 1fr); align-items: center; }
+@media (min-width: 980px) { .hero .wrap { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); } }
+.hero-copy { display: grid; gap: 1.5rem; min-width: 0; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; padding-top: 0.5rem; }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font: 600 1rem/1 var(--body); text-decoration: none;
+  padding: 0.95rem 1.4rem; border-radius: 999px; border: 1px solid var(--gold);
+}
+.btn-primary { background: var(--gold); color: var(--ink); }
+.btn-primary:hover { background: #e6c47f; }
+.btn-ghost { color: var(--gold); }
+.btn-ghost:hover { background: var(--gold-soft); }
+.hero-shot { position: relative; min-width: 0; }
+.hero-shot img {
+  width: 100%; height: auto; aspect-ratio: 16 / 10;
+  border-radius: 10px; border: 1px solid var(--line);
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8), 0 0 0 6px var(--ink-raised);
+}
+.hero-shot figcaption { margin-top: 1rem; font: 400 var(--step--1)/1.4 var(--mono); color: var(--muted); }
+
+/* Sections */
+section { border-top: 1px solid var(--line); }
+.section { padding-block: clamp(3.5rem, 8vw, 6.5rem); }
+.section-head { display: grid; gap: 1rem; margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+
+/* Studio */
+.studio-grid { display: grid; gap: 2.5rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .studio-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 5rem; } }
+.studio-grid .prose { display: grid; gap: 1.2rem; min-width: 0; }
+.facts { margin: 0; display: grid; gap: 0; border-top: 1px solid var(--line); min-width: 0; }
+.facts div { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 1rem; padding-block: 0.95rem; border-bottom: 1px solid var(--line); }
+.facts dt { font: 500 var(--step--1)/1.5 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 0; }
+
+/* Game */
+.game { background: radial-gradient(120% 80% at 85% 0%, rgba(122, 75, 179, 0.22), transparent 60%), var(--ink); }
+.tiles { display: flex; flex-wrap: wrap; gap: 0.6rem 1.1rem; margin: 0.5rem 0 0.25rem; }
+.tile-word { display: flex; gap: 0.18rem; }
+.tile-word span {
+  display: grid; place-items: center;
+  width: clamp(1.9rem, 4.6vw, 3.3rem); aspect-ratio: 4 / 5.2;
+  background: var(--tile); color: var(--tile-blue);
+  font: 400 clamp(1.4rem, 3.6vw, 2.6rem)/1 "Mayhem Street", var(--display);
+  border: 2px solid var(--tile-blue); outline: 2px solid var(--tile);
+  box-shadow: inset 0 0 0 2px var(--tile), inset 0 0 0 3px rgba(31, 79, 168, 0.35), 0 6px 0 rgba(0,0,0,0.35);
+  border-radius: 2px;
+}
+.game-layout { display: grid; gap: 3rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 960px) { .game-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4.5rem; align-items: start; } }
+
+.spec { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.spec th, .spec td { text-align: left; padding: 0.8rem 0; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+.spec th { font: 500 var(--step--1)/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); width: 46%; padding-right: 1rem; }
+.spec td { font: 400 1.05rem/1.4 var(--mono); }
+.spec td small { display: block; font: 400 0.85rem/1.4 var(--body); color: var(--muted); }
+.spec-note { margin-top: 1rem; font-size: 0.9rem; color: var(--muted); }
+
+.features { display: grid; gap: 1.6rem; min-width: 0; }
+.feature { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: 1.2rem; align-items: start; }
+.feature img { width: 5.5rem; height: 5.5rem; border-radius: 10px; background: var(--ink-sunk); }
+.feature div { display: grid; gap: 0.35rem; min-width: 0; }
+.feature p { color: var(--muted); font-size: 0.98rem; }
+
+.symbols { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0.6rem; margin-top: 3.5rem; }
+.symbols img { width: 100%; height: auto; aspect-ratio: 1; border-radius: 8px; background: var(--ink-sunk); }
+@media (max-width: 560px) { .symbols { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.shots { display: grid; gap: 1.2rem; grid-template-columns: minmax(0, 1fr); margin-top: 3.5rem; }
+@media (min-width: 760px) { .shots { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.shots figure { margin: 0; display: grid; gap: 0.7rem; min-width: 0; }
+.shots img { width: 100%; height: auto; aspect-ratio: 16 / 10; border-radius: 8px; border: 1px solid var(--line); }
+.shots figcaption { font: 400 var(--step--1)/1.4 var(--mono); color: var(--muted); }
+
+.craft { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); margin-top: 3.5rem; padding-top: 2.5rem; border-top: 1px solid var(--line); }
+@media (min-width: 760px) { .craft { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5rem; } }
+.craft div { display: grid; gap: 0.5rem; align-content: start; }
+.craft p { color: var(--muted); font-size: 0.98rem; }
+
+/* Math */
+.rtp { display: grid; gap: 1.2rem; }
+.rtp-bar { display: flex; height: 2.6rem; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+.rtp-bar span { display: block; height: 100%; }
+.rtp-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem 2rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); font-variant-numeric: tabular-nums; }
+.rtp-legend li { display: grid; grid-template-columns: 0.8rem minmax(0, 1fr) auto; gap: 0.7rem; align-items: center; font-size: 0.95rem; padding-block: 0.35rem; border-bottom: 1px solid var(--line); }
+.rtp-legend i { width: 0.8rem; height: 0.8rem; border-radius: 2px; }
+.rtp-legend b { font: 500 0.95rem/1 var(--mono); }
+.c-base { background: #b9a37a; }
+.c-wild { background: var(--green); }
+.c-scat { background: #e7d9b9; }
+.c-fs { background: var(--purple); }
+.c-hw { background: var(--gold); }
+.c-edge { background: repeating-linear-gradient(135deg, #2a2230 0 6px, #1a1320 6px 12px); }
+
+.principles { display: grid; gap: 0; grid-template-columns: minmax(0, 1fr); margin-top: 3.5rem; border-top: 1px solid var(--line); }
+@media (min-width: 760px) { .principles { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 3rem; } }
+.principles div { display: grid; gap: 0.4rem; padding-block: 1.4rem; border-bottom: 1px solid var(--line); }
+.principles p { color: var(--muted); font-size: 0.98rem; }
+
+/* Status */
+.status-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.status-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.4rem 1.5rem; padding-block: 1.25rem; border-bottom: 1px solid var(--line); align-items: baseline; }
+@media (min-width: 760px) { .status-list li { grid-template-columns: 15rem minmax(0, 1fr) 9rem; } }
+.status-list strong { font-weight: 600; }
+.status-list .detail { color: var(--muted); font-size: 0.97rem; grid-column: 1 / -1; }
+@media (min-width: 760px) { .status-list .detail { grid-column: auto; } }
+.pill { justify-self: start; font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 0.45rem 0.65rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+@media (max-width: 759px) { .pill { grid-column: 2; grid-row: 1; justify-self: end; } }
+.pill-done { color: var(--green); }
+.pill-open { color: var(--gold); }
+.pill-todo { color: var(--muted); }
+
+/* Contact */
+.contact { background: var(--ink-raised); }
+.contact-grid { display: grid; gap: 2.5rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .contact-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 5rem; align-items: start; } }
+.contact-grid .prose { display: grid; gap: 1.2rem; min-width: 0; }
+.ask { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
+.ask li { padding-left: 1.4rem; position: relative; color: var(--muted); }
+.ask li::before { content: ""; position: absolute; left: 0; top: 0.68em; width: 0.55rem; height: 0.55rem; border: 1.5px solid var(--gold); transform: rotate(45deg); }
+.email-card { display: grid; gap: 1rem; padding: 1.75rem; border: 1px solid var(--line); border-radius: 12px; background: var(--ink); min-width: 0; }
+.email { font: 400 clamp(1.25rem, 3vw, 1.6rem)/1.3 var(--mono); color: var(--ivory); text-decoration: none; overflow-wrap: anywhere; user-select: all; }
+.email-actions { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+.copy-btn { font: 600 0.95rem/1 var(--body); padding: 0.8rem 1.1rem; border-radius: 999px; border: 1px solid var(--gold); background: transparent; color: var(--gold); cursor: pointer; }
+.copy-btn:hover { background: var(--gold-soft); }
+
+/* Footer */
+footer { border-top: 1px solid var(--line); padding-block: 2.5rem 3rem; font-size: 0.88rem; color: var(--muted); }
+footer .wrap { display: grid; gap: 1.5rem; }
+footer .row { display: flex; flex-wrap: wrap; gap: 0.75rem 2rem; justify-content: space-between; align-items: center; }
+footer img { height: 2rem; width: auto; opacity: 0.85; }
+footer p { max-width: 80ch; }
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Balance Digital home"><img src="assets/wordmark-white.png" alt="Balance Digital" width="718" height="293"></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#studio">Studio</a>
+      <a href="#mardi-gras-mayhem">Mardi Gras Mayhem</a>
+      <a href="#math">Math</a>
+      <a href="#status">Status</a>
+      <a class="cta-link" href="#contact">Partner with us</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">Casino game studio · New Orleans</p>
+        <h1>Original slots with a <em>New Orleans</em> soul.</h1>
+        <p class="lede">Balance Digital designs casino games for licensed online operators. Our first title, Mardi Gras Mayhem, is fully playable with its math model complete and documented, and ready for a distribution partner.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#contact">Request the demo</a>
+          <a class="btn btn-ghost" href="#mardi-gras-mayhem">See the game</a>
+        </div>
+      </div>
+      <figure class="hero-shot">
+        <img src="assets/game-base.webp" alt="Mardi Gras Mayhem base game: a 5 by 4 reel set framed in gold, with crowned gator, wild, free spins and doubloon symbols, a four-tier jackpot ladder on the left, and a French Quarter balcony scene behind it." width="1600" height="1000">
+        <figcaption>Mardi Gras Mayhem, free-play build. Captured from the playable demo.</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <section id="studio">
+    <div class="wrap section">
+      <div class="studio-grid">
+        <div class="prose">
+          <p class="eyebrow">The studio</p>
+          <h2>A record producer's ear, applied to the spin.</h2>
+          <p>Balance Digital was founded by David Troia, a New Orleans producer with 20 years in music, 150 major releases and more than 220 million streams. A slot lives or dies on timing: the pace of the reels, the build into a feature, the moment a win lands. That is the same craft as making a record, and it is where we start.</p>
+          <p>We build games the way operators and regulators need them built. Every outcome comes from the random number generator first. The presentation shows that result and nothing else, and the math is documented so a testing lab can verify it.</p>
+        </div>
+        <dl class="facts">
+          <div><dt>Company</dt><dd>Balance Digital LLC</dd></div>
+          <div><dt>Formed</dt><dd>October 2026, Mississippi</dd></div>
+          <div><dt>Home</dt><dd>New Orleans, Louisiana</dd></div>
+          <div><dt>Focus</dt><dd>Online slots for regulated real-money markets, with table games to follow</dd></div>
+          <div><dt>Model</dt><dd>Content supplier to operators through a remote game server or aggregator partner</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="mardi-gras-mayhem" class="game">
+    <div class="wrap section">
+      <div class="section-head">
+        <p class="eyebrow">First title</p>
+        <div class="tiles" role="img" aria-label="Mardi Gras Mayhem">
+          <div class="tile-word" aria-hidden="true"><span>M</span><span>A</span><span>R</span><span>D</span><span>I</span></div>
+          <div class="tile-word" aria-hidden="true"><span>G</span><span>R</span><span>A</span><span>S</span></div>
+          <div class="tile-word" aria-hidden="true"><span>M</span><span>A</span><span>Y</span><span>H</span><span>E</span><span>M</span></div>
+        </div>
+        <p class="lede">Fat Tuesday in the French Quarter, and King Gator rules the parade. Catch gold doubloons to fill the Hold &amp; Win board, land three Free Spins symbols to join the parade, and every Wild that marches in raises the multiplier.</p>
+      </div>
+
+      <div class="game-layout">
+        <div>
+          <table class="spec">
+            <caption class="eyebrow" style="text-align:left; padding-bottom: 0.8rem;">Game sheet</caption>
+            <tbody>
+              <tr><th scope="row">Format</th><td>5 × 4 video slot<small>1,024 ways, left to right, 3 of a kind or more</small></td></tr>
+              <tr><th scope="row">Return to player</th><td>96.25%<small>±0.24% at 95% confidence, 50 million simulated rounds</small></td></tr>
+              <tr><th scope="row">Hit frequency</th><td>27.06%<small>About 1 in 3.7 rounds pays</small></td></tr>
+              <tr><th scope="row">Volatility</th><td>Medium-high</td></tr>
+              <tr><th scope="row">Max win</th><td>5,000× bet</td></tr>
+              <tr><th scope="row">Free Spins Parade</th><td>1 in 177 rounds</td></tr>
+              <tr><th scope="row">Doubloon Hold &amp; Win</th><td>1 in 101 rounds</td></tr>
+              <tr><th scope="row">Fixed jackpots</th><td>10× · 25× · 100× · 1,000×<small>Mini, Minor, Major, Grand</small></td></tr>
+            </tbody>
+          </table>
+          <p class="spec-note">Figures come from our own simulation and par sheet. An accredited lab will verify them independently during certification.</p>
+        </div>
+
+        <div class="features">
+          <p class="eyebrow">Features</p>
+          <div class="feature">
+            <img src="assets/symbols/wild.webp" alt="" width="288" height="288" loading="lazy">
+            <div>
+              <h3>Krewe Wilds</h3>
+              <p>About 1 in 130 base rounds, one, two or all three middle reels turn fully wild. It keeps the base game lively between features.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <img src="assets/symbols/freespins.webp" alt="" width="288" height="288" loading="lazy">
+            <div>
+              <h3>Free Spins Parade</h3>
+              <p>Three, four or five scatters award 8, 12 or 20 free spins. Every Wild that lands adds +1× to a parade multiplier that holds for the whole feature, up to 10×. Retriggers add five spins.</p>
+            </div>
+          </div>
+          <div class="feature">
+            <img src="assets/symbols/doubloon.webp" alt="" width="288" height="288" loading="lazy">
+            <div>
+              <h3>Doubloon Hold &amp; Win</h3>
+              <p>Six or more gold doubloons lock in place for three respins, and each new coin resets the count. Coins carry cash values or one of four fixed jackpots. Fill all 20 cells and the Grand pays 1,000×.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="symbols" aria-label="Symbol art">
+        <img src="assets/symbols/gator.webp" alt="Crowned gator" width="288" height="288" loading="lazy">
+        <img src="assets/symbols/wild.webp" alt="Gator wild" width="288" height="288" loading="lazy">
+        <img src="assets/symbols/sevens.webp" alt="Triple sevens" width="288" height="288" loading="lazy">
+        <img src="assets/symbols/mask.webp" alt="Carnival mask" width="288" height="288" loading="lazy">
+        <img src="assets/symbols/fleur.webp" alt="Fleur-de-lis" width="288" height="288" loading="lazy">
+        <img src="assets/symbols/beads.webp" alt="Mardi Gras beads" width="288" height="288" loading="lazy">
+        <img src="assets/symbols/okra.webp" alt="Okra" width="288" height="288" loading="lazy">
+        <img src="assets/symbols/freespins.webp" alt="Free spins scatter" width="288" height="288" loading="lazy">
+      </div>
+
+      <div class="shots">
+        <figure>
+          <img src="assets/game-base.webp" alt="Base game with the jackpot ladder and doubloons on the reels." width="1600" height="1000" loading="lazy">
+          <figcaption>Base game · jackpot ladder and doubloons</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/game-free-spins.webp" alt="Free Spins Parade in progress, with the parade multiplier meter above the reels." width="1600" height="1000" loading="lazy">
+          <figcaption>Free Spins Parade · multiplier meter above the reels</figcaption>
+        </figure>
+      </div>
+
+      <div class="craft">
+        <div>
+          <h3>Sound built in-house</h3>
+          <p>A custom New Orleans soundtrack with brass, parade drums and a game-show host who calls out the big moments. Celebrations scale with the size of the win.</p>
+        </div>
+        <div>
+          <h3>Original type</h3>
+          <p>The title is set in Mayhem Street, a typeface we drew from the blue-and-white street-name tiles set into New Orleans sidewalks.</p>
+        </div>
+        <div>
+          <h3>Mobile first</h3>
+          <p>The interface adapts from desktop to phone screens, since most US online casino play happens on a phone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="math">
+    <div class="wrap section">
+      <div class="section-head">
+        <p class="eyebrow">Math and integrity</p>
+        <h2>Built to pass certification, not to work around it.</h2>
+        <p class="lede muted">Where the 96.25% comes from, by feature, measured over 50 million simulated rounds.</p>
+      </div>
+
+      <div class="rtp">
+        <div class="rtp-bar" role="img" aria-label="Return to player split: base game 59.58%, Krewe Wilds 7.51%, scatter pays 0.68%, Free Spins Parade 15.57%, Doubloon Hold and Win 12.92%, house edge 3.75%.">
+          <span class="c-base" style="width:59.582%"></span>
+          <span class="c-wild" style="width:7.509%"></span>
+          <span class="c-scat" style="width:0.675%"></span>
+          <span class="c-fs" style="width:15.566%"></span>
+          <span class="c-hw" style="width:12.918%"></span>
+          <span class="c-edge" style="width:3.75%"></span>
+        </div>
+        <ul class="rtp-legend">
+          <li><i class="c-base"></i>Base game line wins<b>59.58%</b></li>
+          <li><i class="c-fs"></i>Free Spins Parade<b>15.57%</b></li>
+          <li><i class="c-hw"></i>Doubloon Hold &amp; Win<b>12.92%</b></li>
+          <li><i class="c-wild"></i>Krewe Wilds<b>7.51%</b></li>
+          <li><i class="c-scat"></i>Scatter pays<b>0.68%</b></li>
+          <li><i class="c-edge"></i>House edge<b>3.75%</b></li>
+        </ul>
+      </div>
+
+      <div class="principles">
+        <div><h3>The RNG decides first</h3><p>Each round, including every free spin and respin, is fully decided before anything animates. The reels only display that result.</p></div>
+        <div><h3>No staged near-misses</h3><p>Reel stops come straight from the RNG. Nothing places symbols just off a win to manufacture suspense.</p></div>
+        <div><h3>Honest celebrations</h3><p>Big-win presentations start at 10× the bet and grow with the win. A return smaller than the stake simply updates the win meter.</p></div>
+        <div><h3>Fixed math</h3><p>Odds never change based on the player, the session or past results. One configuration file holds every number that affects RTP.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="status">
+    <div class="wrap section">
+      <div class="section-head">
+        <p class="eyebrow">Where we are</p>
+        <h2>A straight answer on readiness.</h2>
+        <p class="lede muted">Mardi Gras Mayhem is not yet certified or licensed for real-money play. This is the current state, updated as each step closes.</p>
+      </div>
+      <ul class="status-list">
+        <li><strong>Game design and art</strong><span class="detail">Theme, symbols, frame, interface and animation complete in a playable free-play build.</span><span class="pill pill-done">Complete</span></li>
+        <li><strong>Math model</strong><span class="detail">Paytable, reel strips and features tuned to 96.25% RTP. Par sheet generated from 50 million rounds.</span><span class="pill pill-done">Complete</span></li>
+        <li><strong>Sound and music</strong><span class="detail">Soundtrack, host callouts and effects in the demo build.</span><span class="pill pill-done">Complete</span></li>
+        <li><strong>Distribution partner</strong><span class="detail">Seeking a remote game server or aggregator partner to host the game and connect it to operators.</span><span class="pill pill-open">Seeking</span></li>
+        <li><strong>Lab certification</strong><span class="detail">Submission to an accredited lab such as GLI or BMM, run with the hosting partner's certified RNG.</span><span class="pill pill-todo">Not started</span></li>
+        <li><strong>Supplier licensing</strong><span class="detail">State supplier licenses in the markets where the game will go live.</span><span class="pill pill-todo">Not started</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="wrap section">
+      <div class="contact-grid">
+        <div class="prose">
+          <p class="eyebrow">Partner with us</p>
+          <h2>Bring Mardi Gras Mayhem to your lobby.</h2>
+          <p>We're talking with remote game server providers, aggregators and operators. Write to us and we'll set you up with:</p>
+          <ul class="ask">
+            <li>Private access to the playable demo, including one-tap feature triggers for review</li>
+            <li>The full par sheet and win distribution</li>
+            <li>Engine and integration notes for your technical team</li>
+          </ul>
+        </div>
+        <div class="email-card">
+          <p class="eyebrow">Business inquiries</p>
+          <a class="email" id="email" href="mailto:partners@balancedigital.games">partners@balancedigital.games</a>
+          <div class="email-actions">
+            <button class="copy-btn" id="copy-email" type="button">Copy address</button>
+          </div>
+          <p class="muted" style="font-size:0.9rem">David Troia, Founder</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <img src="assets/wordmark-white.png" alt="Balance Digital" width="718" height="293">
+      <span>© 2026 Balance Digital LLC. All rights reserved.</span>
+    </div>
+    <p>Mardi Gras Mayhem is shown for business evaluation. The demo uses play credits with no cash value and is not offered for real-money play. Games are for adults 21 and over where legal. If you or someone you know has a gambling problem, call 1-800-GAMBLER.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var btn = document.getElementById('copy-email');
+  var email = document.getElementById('email');
+  if (!btn || !email) return;
+  btn.addEventListener('click', function () {
+    var text = email.textContent.trim();
+    function done() { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy address'; }, 1800); }
+    function fallback() { var r = document.createRange(); r.selectNodeContents(email); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Selected, press copy'; }
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+})();
+</script>
+</body>
+</html>

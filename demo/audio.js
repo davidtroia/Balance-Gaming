@@ -16,6 +16,14 @@ export function unlock() {
   master = ctx.createGain();
   master.gain.value = 0.55;
   master.connect(ctx.destination);
+  // Go quiet when the game is hidden (tab switch, phone locked), and wake the
+  // sound again when it comes back. iPhones also park audio after a call or
+  // Siri ("interrupted"), and only a tap can restart it, so every tap retries.
+  const wake = () => { if (ctx.state !== 'running' && !document.hidden) ctx.resume().catch(() => {}); };
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) ctx.suspend().catch(() => {}); else wake();
+  });
+  addEventListener('pointerdown', wake, { capture: true, passive: true });
 }
 
 export function setMuted(value) {
@@ -184,32 +192,38 @@ export const sfx = {
   },
 };
 
-// Music made in Suno: "Midnight Club" for the base game and "Summit Run" for
-// free spins. Each loops with a short crossfade from its end back to the top,
-// and switching tracks crossfades between them. Hold & Win muffles the music
-// for tension, and big celebrations duck it so the fanfare cuts through.
+// Music made in Suno by David: Frenchmen Street for the base game, Second
+// Line Parade for free spins and Doubloon Toss for Hold & Win. Each track
+// loops between two beats measured in the file (tools/loop-points.py), the
+// same bar position a whole number of bars apart, so the groove never
+// stumbles at the seam: the next pass starts on the loop-in beat exactly as
+// the current one reaches the loop-out beat, with a half-beat crossfade (short, because Suno's tempo drifts a little).
+// Switching tracks crossfades between them. Big celebrations duck the music
+// so the host and fanfare cut through.
 const TRACKS = {
-  base: new URL('./music/frenchmen-street.mp3', import.meta.url),
-  fs: new URL('./music/second-line-parade.mp3', import.meta.url),
-  hw: new URL('./music/doubloon-toss.mp3', import.meta.url),
+  base: { url: new URL('./music/frenchmen-street.mp3', import.meta.url), loopIn: 11.146, loopOut: 88.906, beat: 0.604 },
+  fs: { url: new URL('./music/second-line-parade.mp3', import.meta.url), loopIn: 13.235, loopOut: 56.178, beat: 0.534 },
+  hw: { url: new URL('./music/doubloon-toss.mp3', import.meta.url), loopIn: 13.119, loopOut: 143.612, beat: 0.581 },
 };
-const XFADE = 2;
 const MOODS = { base: { gain: 0.34, cutoff: 18000 }, fs: { gain: 0.4, cutoff: 18000 }, hw: { gain: 0.36, cutoff: 18000 } };
 const buffers = {};
 let music = null;
 let mood = 'base';
 let player = null;
+let wanted = 'base';
 
-// Where the music really ends, skipping trailing silence.
-function lastSound(buffer) {
-  const data = buffer.getChannelData(0);
-  for (let i = data.length - 1; i > 0; i -= 64) if (Math.abs(data[i]) > 0.01) return i / buffer.sampleRate;
-  return buffer.duration;
+const fetched = {};
+const fetchTrack = (name) => (fetched[name] ??= fetch(TRACKS[name].url).then((r) => r.arrayBuffer()));
+
+// Start downloading the base-game music as soon as the page has loaded, so
+// it is usually ready by the time the player taps Start. Decoding has to
+// wait for that tap (the browser's audio unlock).
+export function prefetchMusic() {
+  fetchTrack('base').catch(() => {});
 }
 
 function loadTrack(name) {
-  buffers[name] ??= fetch(TRACKS[name])
-    .then((r) => r.arrayBuffer())
+  buffers[name] ??= fetchTrack(name)
     .then((bytes) => new Promise((ok, fail) => ctx.decodeAudioData(bytes, ok, fail)))
     .catch(() => null);
   return buffers[name];
@@ -224,16 +238,20 @@ export async function startTheme() {
   bus.gain.value = MOODS[mood].gain;
   bus.connect(filter).connect(master);
   music = { filter, bus };
-  loadTrack('fs');
-  loadTrack('hw');
-  playTrack('base');
+  // Base track first, on its own: on a phone's connection the three songs
+  // downloading at once kept the base music silent for 20+ seconds. The
+  // feature tracks follow one at a time while the player is in the base game.
+  await playTrack('base');
+  await loadTrack('fs');
+  await loadTrack('hw');
 }
 
 // Fade out whatever is playing and start `name` from the top.
 async function playTrack(name) {
   if (!music) return;
   const buffer = await loadTrack(name);
-  if (!buffer) return;
+  if (!buffer || name !== wanted) return;
+  if (player?.name === name && !player.stopped) return;
   if (player) {
     const old = player;
     old.stopped = true;
@@ -245,31 +263,35 @@ async function playTrack(name) {
   out.gain.setValueAtTime(0, ctx.currentTime);
   out.gain.linearRampToValueAtTime(1, ctx.currentTime + 1.2);
   out.connect(music.bus);
-  player = { name, buffer, end: lastSound(buffer), out, sources: [], stopped: false };
-  playPass(player, ctx.currentTime + 0.05, 0.05);
+  const t = TRACKS[name];
+  const loopOut = Math.min(t.loopOut, buffer.duration - t.beat - 0.05);
+  player = { name, buffer, loopIn: t.loopIn, loopOut, fade: t.beat / 2, out, sources: [], stopped: false };
+  playPass(player, ctx.currentTime + 0.05, 0, 0.05);
 }
 
-// One pass through the song, fading out while the next pass fades in.
-function playPass(p, at, fadeIn) {
+// One pass from `offset` to the loop-out beat. The next pass starts on the
+// loop-in beat at that same instant, so the beat grid carries straight on.
+function playPass(p, at, offset, fadeIn) {
   if (p.stopped) return;
   const src = ctx.createBufferSource();
   const g = ctx.createGain();
   src.buffer = p.buffer;
   src.connect(g).connect(p.out);
-  const outAt = at + p.end - XFADE;
+  const seam = at + (p.loopOut - offset);
   g.gain.setValueAtTime(0, at);
   g.gain.linearRampToValueAtTime(1, at + fadeIn);
-  g.gain.setValueAtTime(1, outAt);
-  g.gain.linearRampToValueAtTime(0, outAt + XFADE);
-  src.start(at);
-  src.stop(outAt + XFADE + 0.1);
+  g.gain.setValueAtTime(1, seam);
+  g.gain.linearRampToValueAtTime(0, seam + p.fade);
+  src.start(at, offset);
+  src.stop(seam + p.fade + 0.05);
   p.sources = [...p.sources.slice(-1), src];
-  p.timer = setTimeout(() => playPass(p, outAt, XFADE), Math.max(0, (outAt - ctx.currentTime - 5) * 1000));
+  p.timer = setTimeout(() => playPass(p, seam, p.loopIn, p.fade), Math.max(0, (seam - ctx.currentTime - 5) * 1000));
 }
 
 export function setMood(next) {
   const track = TRACKS[next] ? next : 'base';
   mood = next;
+  wanted = track;
   if (!music) return;
   const t = ctx.currentTime;
   music.bus.gain.setTargetAtTime(MOODS[mood].gain, t, 0.4);
@@ -309,6 +331,14 @@ const VOICE = {
   maxwin: new URL('./voice/maxwin.mp3', import.meta.url).href,
   cheer: new URL('./voice/cheer.mp3', import.meta.url).href,
 };
+// Level trims in dB that bring every line to about -16.5 LUFS, measured with
+// ffmpeg's ebur128 filter, so no call-out jumps out or gets lost.
+const VOICE_TRIM_DB = {
+  welcome: -0.7, freespins: 0.8, retrigger: 3, paradeover: -0.1, holdwin: 2.6, totalwin: 0.4,
+  bigwin: 0.7, megawin: -0.3, epicwin: 0.3, legendary: -1.3, krewe: 0, mini: 1.9, minor: 0.3,
+  major: 0.6, grand: 1, maxwin: -0.3,
+};
+const trim = (name) => 10 ** ((VOICE_TRIM_DB[name] ?? 0) / 20);
 const clips = {};
 let speaking = null;
 
@@ -347,7 +377,7 @@ export async function say(name) {
   try { speaking?.stop(); } catch { /* already finished */ }
   const src = ctx.createBufferSource();
   const g = ctx.createGain();
-  g.gain.value = 1.1;
+  g.gain.value = 1.1 * trim(name);
   src.buffer = buffer;
   src.connect(g).connect(master);
   src.start();

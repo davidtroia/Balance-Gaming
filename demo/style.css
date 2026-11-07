@@ -1,6 +1,14 @@
 /* David's own street-tile faces: Weathered for the logo tiles, Clean for banners and meters. */
-@font-face { font-family: 'MayhemStreet'; src: url("fonts/MayhemStreet-Clean.ttf") format('truetype'); font-display: block; }
-@font-face { font-family: 'MayhemStreetWeathered'; src: url("fonts/MayhemStreet-Weathered.ttf") format('truetype'); font-display: block; }
+@font-face { font-family: 'MayhemStreet'; src: url("fonts/MayhemStreet-Clean.woff2") format('woff2'); font-display: block; }
+@font-face { font-family: 'MayhemStreetWeathered'; src: url("fonts/MayhemStreet-Weathered.woff2") format('woff2'); font-display: block; }
+/* Archivo (SIL Open Font License, fonts/OFL-Archivo.txt), self-hosted so the
+   game makes no third-party requests: operators' security policies and EU
+   privacy rules both object to loading Google Fonts at play time. */
+@font-face {
+  font-family: 'Archivo'; src: url("fonts/Archivo-latin.woff2") format('woff2');
+  font-weight: 400 900; font-stretch: 62% 125%; font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 /* Mardi Gras Mayhem: an ornate gold cabinet strung with purple, green and
    gold beads, standing in a French Quarter street on Fat Tuesday night.
    Two colour layers: purple, green and gold for the game itself (symbols,
@@ -38,7 +46,7 @@
   --ui: 'Archivo', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
   /* Display face for meters, banners and tile letters: heavy wood type like
      old parade posters. Swap this one line to try another face. */
-  --show: 'MayhemStreet', 'Ultra', 'Rockwell Extra Bold', 'Rockwell', Georgia, serif;
+  --show: 'MayhemStreet', 'Rockwell Extra Bold', 'Rockwell', Georgia, serif;
   font-family: var(--ui);
   color: var(--ink);
 }

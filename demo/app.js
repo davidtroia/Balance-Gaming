@@ -5,7 +5,7 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare, stopFanfare } from './audio.js';
+import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare, stopFanfare, prefetchMusic } from './audio.js';
 import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
@@ -650,3 +650,6 @@ function fitPhone() {
 }
 addEventListener('resize', fitPhone);
 fitPhone();
+
+// Begin the base music download once the page itself has finished loading.
+if (document.readyState === 'complete') prefetchMusic(); else addEventListener('load', prefetchMusic, { once: true });

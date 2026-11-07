@@ -204,8 +204,10 @@ const TRACKS = {
   base: { url: new URL('./music/frenchmen-street.mp3', import.meta.url), loopIn: 11.146, loopOut: 88.906, beat: 0.604 },
   fs: { url: new URL('./music/second-line-parade.mp3', import.meta.url), loopIn: 13.235, loopOut: 56.178, beat: 0.534 },
   hw: { url: new URL('./music/doubloon-toss.mp3', import.meta.url), loopIn: 13.119, loopOut: 143.612, beat: 0.581 },
+  // "Free Spins higher energy" (Suno): the free spins song turned up. It takes over once the parade multiplier climbs or a retrigger lands.
+  fs2: { url: new URL('./music/second-line-parade-hot.mp3', import.meta.url), loopIn: 3.135, loopOut: 84.73, beat: 0.464 },
 };
-const MOODS = { base: { gain: 0.34, cutoff: 18000 }, fs: { gain: 0.4, cutoff: 18000 }, hw: { gain: 0.36, cutoff: 18000 } };
+const MOODS = { base: { gain: 0.34, cutoff: 18000 }, fs: { gain: 0.4, cutoff: 18000 }, fs2: { gain: 0.43, cutoff: 18000 }, hw: { gain: 0.36, cutoff: 18000 } };
 const buffers = {};
 let music = null;
 let mood = 'base';
@@ -244,6 +246,7 @@ export async function startTheme() {
   await playTrack('base');
   await loadTrack('fs');
   await loadTrack('hw');
+  await loadTrack('fs2');
 }
 
 // Fade out whatever is playing and start `name` from the top.

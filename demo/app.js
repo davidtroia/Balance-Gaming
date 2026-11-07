@@ -363,6 +363,9 @@ function setParadeMeter(mult) {
   $('paradeMult').textContent = `${mult}x`;
 }
 
+// Free spins music steps up to the higher-energy song from this parade multiplier (or on any retrigger).
+const HOT_MULT = 3;
+
 async function playFreeSpins(fs, scatterCount) {
   sfx.featureStart();
   party(true);
@@ -383,6 +386,7 @@ async function playFreeSpins(fs, scatterCount) {
     if (spin.multiplier > mult) {
       mult = spin.multiplier;
       setParadeMeter(mult);
+      if (mult >= HOT_MULT) setMood('fs2');
       sfx.multiplierUp();
       alt.classList.remove('bump'); void alt.offsetWidth; alt.classList.add('bump');
       const b = $('marker').getBoundingClientRect();
@@ -390,7 +394,7 @@ async function playFreeSpins(fs, scatterCount) {
       led(`Parade multiplier · ${mult}x`, true);
     }
     const cells = markWins(spin.grid, spin.wins, spin.retrigger > 0);
-    if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); sfx.featureStart(); say('retrigger'); applause(0.5); }
+    if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); setMood('fs2'); sfx.featureStart(); say('retrigger'); applause(0.5); }
     if (spin.win > 0) {
       sfx.win();
       sparkleCells(cells, 8);

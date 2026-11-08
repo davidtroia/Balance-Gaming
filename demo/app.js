@@ -5,7 +5,7 @@ import * as C from '../engine/config.js';
 import { buildReels, playRound } from '../engine/engine.js';
 import { cryptoRng, seededRng } from '../engine/rng.js';
 import { symbolSvg, SVG_DEFS } from './art.js';
-import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare, stopFanfare } from './audio.js';
+import { unlock, sfx, reelTicker, setMuted, isMuted, startTheme, setMood, duckTheme, say, applause, preloadVoices, fanfare, stopFanfare, prefetchMusic } from './audio.js';
 import { startConfetti, createOverlay } from './fx.js';
 
 const BETS = [0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500];
@@ -246,7 +246,17 @@ const UI_ART = {
   betPlus: new URL('./img/btn-bet-plus.webp', import.meta.url).href,
   betPlusPressed: new URL('./img/btn-bet-plus-pressed.webp', import.meta.url).href,
   icon: new URL('./img/icon.webp', import.meta.url).href,
+  studio: new URL('./img/balance-digital.webp', import.meta.url).href,
+  crestTop: new URL('./img/frame-crest-top.webp', import.meta.url).href,
+  crestBottom: new URL('./img/frame-crest-bottom.webp', import.meta.url).href,
 };
+// Painted backdrop and reel frame, handed to the stylesheet as variables.
+{
+  const rs = document.documentElement.style;
+  rs.setProperty('--street-wide', `url("${new URL('./img/street-wide.webp', import.meta.url).href}")`);
+  rs.setProperty('--street-tall', `url("${new URL('./img/street-tall.webp', import.meta.url).href}")`);
+  rs.setProperty('--frame-art', `url("${new URL('./img/frame.webp', import.meta.url).href}")`);
+}
 document.querySelectorAll('[data-art]').forEach((img) => { img.src = UI_ART[img.dataset.art]; img.draggable = false; });
 
 document.querySelectorAll('[data-tiles]').forEach((el) => setTiles(el, el.dataset.tiles));
@@ -353,6 +363,9 @@ function setParadeMeter(mult) {
   $('paradeMult').textContent = `${mult}x`;
 }
 
+// Free spins music steps up to the higher-energy song from this parade multiplier (or on any retrigger).
+const HOT_MULT = 3;
+
 async function playFreeSpins(fs, scatterCount) {
   sfx.featureStart();
   party(true);
@@ -373,6 +386,7 @@ async function playFreeSpins(fs, scatterCount) {
     if (spin.multiplier > mult) {
       mult = spin.multiplier;
       setParadeMeter(mult);
+      if (mult >= HOT_MULT) setMood('fs2');
       sfx.multiplierUp();
       alt.classList.remove('bump'); void alt.offsetWidth; alt.classList.add('bump');
       const b = $('marker').getBoundingClientRect();
@@ -380,7 +394,7 @@ async function playFreeSpins(fs, scatterCount) {
       led(`Parade multiplier · ${mult}x`, true);
     }
     const cells = markWins(spin.grid, spin.wins, spin.retrigger > 0);
-    if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); sfx.featureStart(); say('retrigger'); applause(0.5); }
+    if (spin.retrigger) { led(`+${spin.retrigger} free spins!`, true); setMood('fs2'); sfx.featureStart(); say('retrigger'); applause(0.5); }
     if (spin.win > 0) {
       sfx.win();
       sparkleCells(cells, 8);
@@ -640,3 +654,6 @@ function fitPhone() {
 }
 addEventListener('resize', fitPhone);
 fitPhone();
+
+// Begin the base music download once the page itself has finished loading.
+if (document.readyState === 'complete') prefetchMusic(); else addEventListener('load', prefetchMusic, { once: true });

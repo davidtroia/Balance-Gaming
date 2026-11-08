@@ -36,6 +36,7 @@ engine/rng.js      seeded RNG for simulation, crypto RNG for the demo
 sim/simulate.js    Monte Carlo simulator and report
 sim/tune.js        quick what-if runs with config overrides
 demo/              free-play browser demo that animates engine results
+tools/loop-points.py  finds beat-aligned loop points for the music (needs librosa)
 docs/par-sheet.md  math summary for labs and operators
 ```
 

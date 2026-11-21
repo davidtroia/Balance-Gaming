@@ -1,0 +1,11 @@
+{
+  "appId": "com.balancedigital.mardigrasmayhem",
+  "appName": "Mardi Gras Mayhem",
+  "webDir": "www",
+  "backgroundColor": "#1a0933",
+  "ios": { "contentInset": "never" },
+  "plugins": {
+    "SplashScreen": { "launchAutoHide": true, "launchShowDuration": 800, "backgroundColor": "#1a0933" },
+    "StatusBar": { "style": "DARK", "backgroundColor": "#1a0933" }
+  }
+}

@@ -1,0 +1,42 @@
+name: Android build
+
+# Builds the free-play Android app and attaches the installable APK to the run.
+# Run it from the Actions tab ("Run workflow"), then download the artifact and
+# open the .apk on a phone to test. Store uploads need a signed release build;
+# see docs/free-play-app.md.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'app/**'
+      - 'demo/**'
+      - 'engine/**'
+      - 'scripts/build-app.js'
+      - '.github/workflows/android.yml'
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+        working-directory: app
+      - run: npm run build
+        working-directory: app
+      - run: npx cap sync android
+        working-directory: app
+      - run: ./gradlew assembleDebug
+        working-directory: app/android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mardi-gras-mayhem-debug-apk
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk

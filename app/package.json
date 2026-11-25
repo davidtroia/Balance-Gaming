@@ -1,0 +1,19 @@
+{
+  "name": "mardi-gras-mayhem-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Free-play Mardi Gras Mayhem in an iOS and Android shell (Capacitor).",
+  "scripts": {
+    "build": "node ../scripts/build-app.js",
+    "build:telegram": "node ../scripts/build-app.js telegram",
+    "sync": "npm run build && cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  }
+}

@@ -639,20 +639,28 @@ requestAnimationFrame(() => { sizeCells(); placeBulbs(); });
 // Phones lay the cabinet out at one design width, then zoom it so the
 // marquee, jackpots, reels and controls all fit without scrolling.
 const PHONE_W = 430;
+// Some phone web views (in-app browsers, iframes) report a different window
+// height each time the page changes, which made the whole cabinet grow and
+// shrink on every spin. So the height used for fitting is the smallest seen
+// at the current width; it only resets when the width changes (rotation).
+let fitW = 0, fitH = Infinity, fitTimer = 0;
 function fitPhone() {
   const cab = $('cabinet');
   const phone = innerWidth <= 700 || (matchMedia('(pointer: coarse)').matches && innerHeight <= 500);
-  if (!phone) { cab.style.zoom = ''; cab.style.width = ''; document.body.classList.remove('fitted'); return; }
+  if (!phone) { cab.style.zoom = ''; cab.style.width = ''; document.body.classList.remove('fitted'); fitW = 0; fitH = Infinity; return; }
   document.body.classList.add('fitted');
+  if (Math.abs(innerWidth - fitW) > 2) { fitW = innerWidth; fitH = Infinity; }
+  if (innerHeight > 200) fitH = Math.min(fitH, innerHeight);
+  const h = Number.isFinite(fitH) ? fitH : innerHeight;
   // Never lay it out wider than the screen, even for a moment: a phone browser
   // would widen its viewport to fit and the measurement would be off.
   cab.style.zoom = ((innerWidth - 8) / PHONE_W).toFixed(4);
   cab.style.width = `${PHONE_W}px`;
-  const z = Math.min((innerWidth - 8) / PHONE_W, innerHeight / cab.scrollHeight);
+  const z = Math.min((innerWidth - 8) / PHONE_W, h / cab.scrollHeight);
   cab.style.zoom = z.toFixed(4);
   sizeCells(); placeBulbs();
 }
-addEventListener('resize', fitPhone);
+addEventListener('resize', () => { clearTimeout(fitTimer); fitTimer = setTimeout(fitPhone, 120); });
 fitPhone();
 
 // Begin the base music download once the page itself has finished loading.
